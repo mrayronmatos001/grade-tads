@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grade curricular TADS UFRN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="img/favicon-64.png">
+  <link rel="apple-touch-icon" href="img/favicon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <header class="topo">
+    <a class="marca" href="/">
+      <img src="img/logo-tads.png" alt="Logotipo do curso TADS da UFRN" width="64" height="64">
+      <span class="marca-texto">
+        <strong>Grade curricular</strong>
+        <span id="nomeCurso">Análise e Desenvolvimento de Sistemas, UFRN</span>
+        <span class="cargas" id="cargas" aria-live="polite"></span>
+      </span>
+    </a>
+  </header>
+
+  <main class="pagina">
+    <form class="pergunta" id="formulario" novalidate>
+      <div class="tipos" id="tipos" role="tablist" aria-label="Tipo de pergunta"></div>
+
+      <p class="frase" id="frase"></p>
+      <div id="extra"></div>
+
+      <p class="erro-form" id="erroForm" role="alert"></p>
+    </form>
+
+    <section class="resposta" id="resultado" aria-live="polite">
+      <p class="vazio">Carregando a grade…</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

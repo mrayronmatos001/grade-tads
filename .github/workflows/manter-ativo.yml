@@ -1,0 +1,16 @@
+# Acessa o site a cada 3 dias. O acesso faz uma consulta ao banco, o que
+# impede o Supabase gratuito de pausar o projeto por inatividade (7 dias).
+# Configure a variável SITE_URL em: Settings > Secrets and variables > Actions > Variables
+name: Manter o banco ativo
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar o status do site
+        run: curl --fail --silent --show-error "${{ vars.SITE_URL }}/api/status"

@@ -1,0 +1,16 @@
+{
+  "name": "grade-tads",
+  "version": "2.0.0",
+  "description": "Consultas à grade curricular do TADS/UFRN em PostgreSQL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.12"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
