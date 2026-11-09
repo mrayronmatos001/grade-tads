@@ -7,7 +7,9 @@
 - Cabeçalho exibe os créditos e as horas obrigatórias da grade.
 - "O que libera" começa na grade mais recente (TADS 2019).
 - Documentação de lançamento: licença proprietária, termos de uso,
-  política de privacidade, avisos de terceiros, arquitetura e implantação.
+  política de privacidade, avisos de terceiros, arquitetura, implantação
+  e guia de registro do programa de computador pela AGIR/UFRN.
+- Autoria: Ayron Matos e Heitor Felipe.
 
 ## 2.0.0
 - Versão de produção somente com PostgreSQL (Supabase).

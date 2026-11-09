@@ -47,6 +47,8 @@ O plano gratuito pausa projetos após 7 dias sem acesso ao banco. O workflow
 
 ## Checklist de lançamento comercial
 
+- [ ] Conversar com a AGIR/UFRN sobre o registro e a titularidade (veja `docs/REGISTRO_SOFTWARE.md`).
+      Se a UFRN for a titular, o licenciamento a terceiros passa a ser feito pela universidade.
 - [ ] Repositório do GitHub **privado** (o código de um software proprietário não deve ficar público).
 - [ ] Plano de hospedagem compatível com uso comercial: o plano Hobby da Vercel é
       destinado a uso pessoal e não comercial; para fins comerciais, use o plano Pro.

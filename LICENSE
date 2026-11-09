@@ -1,16 +1,27 @@
 LICENÇA DE SOFTWARE PROPRIETÁRIO
 
 Grade TADS
-Copyright (c) 2026 Ayron Matos. Todos os direitos reservados.
+Copyright (c) 2026 Ayron Matos e Heitor Felipe. Todos os direitos reservados.
 
-1. TITULARIDADE
+1. AUTORIA E TITULARIDADE
 Este software, incluindo código-fonte, código-objeto, interface, design,
-documentação e demais materiais que o acompanham (o "Software"), é de
-propriedade exclusiva de Ayron Matos (o "Titular") e está protegido pela
-Lei nº 9.609/1998 (Lei do Software), pela Lei nº 9.610/1998 (Lei de
-Direitos Autorais) e pelos tratados internacionais aplicáveis.
+documentação e demais materiais que o acompanham (o "Software"), foi criado
+por Ayron Matos e Heitor Felipe (os "Autores"), estudantes do curso de
+Análise e Desenvolvimento de Sistemas da Universidade Federal do Rio Grande
+do Norte (UFRN), e está protegido pela Lei nº 9.609/1998 (Lei do Software),
+pela Lei nº 9.610/1998 (Lei de Direitos Autorais) e pelos tratados
+internacionais aplicáveis.
 
-2. O QUE NÃO É PERMITIDO SEM AUTORIZAÇÃO ESCRITA DO TITULAR
+Os direitos patrimoniais pertencem aos Autores (os "Titulares") até que
+seja concluído o registro do Software. Caso o registro seja realizado por
+meio da Agência de Inovação da UFRN (AGIR), a titularidade patrimonial
+poderá ser cedida, total ou parcialmente, à UFRN, nos termos da Lei
+nº 10.973/2004 (Lei de Inovação) e das normas internas da universidade,
+preservados os direitos morais dos Autores e a sua participação nos ganhos
+econômicos prevista em lei. Nesse caso, esta licença será atualizada para
+indicar o titular registrado.
+
+2. O QUE NÃO É PERMITIDO SEM AUTORIZAÇÃO ESCRITA DOS TITULARES
 a) copiar, reproduzir ou armazenar o Software, no todo ou em parte;
 b) modificar, adaptar, traduzir ou criar obras derivadas;
 c) distribuir, publicar, sublicenciar, vender, alugar ou ceder o Software;
@@ -37,7 +48,7 @@ finalidade específica. As informações curriculares exibidas têm caráter
 informativo e não substituem os documentos oficiais da instituição.
 
 6. LIMITAÇÃO DE RESPONSABILIDADE
-Na máxima extensão permitida pela lei, o Titular não se responsabiliza por
+Na máxima extensão permitida pela lei, os Titulares não se responsabilizam por
 danos diretos ou indiretos decorrentes do uso ou da impossibilidade de uso
 do Software, incluindo decisões acadêmicas tomadas com base nele.
 
@@ -46,4 +57,4 @@ Esta licença é regida pelas leis da República Federativa do Brasil. Fica
 eleito o foro da Comarca de Natal/RN para dirimir quaisquer controvérsias.
 
 Para solicitar autorização de uso, licenciamento ou parcerias, entre em
-contato com o Titular.
+contato com os Titulares.

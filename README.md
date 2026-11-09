@@ -1,8 +1,11 @@
 # Grade TADS
 
-> **Software proprietário.** Copyright © 2026 Ayron Matos. Todos os direitos
-> reservados. É proibido copiar, modificar ou distribuir este código sem
-> autorização escrita do titular. Veja [`LICENSE`](LICENSE).
+> **Software proprietário.** Copyright © 2026 Ayron Matos e Heitor Felipe.
+> Todos os direitos reservados. É proibido copiar, modificar ou distribuir
+> este código sem autorização escrita dos titulares. Veja [`LICENSE`](LICENSE).
+
+**Autores:** Ayron Matos e Heitor Felipe, estudantes de Análise e
+Desenvolvimento de Sistemas da UFRN.
 
 Site para consultar a grade curricular do curso de Análise e Desenvolvimento
 de Sistemas da UFRN (estruturas 2015 e 2019).
@@ -40,6 +43,7 @@ Para criar o banco, rode `sql/banco_completo.sql` no PostgreSQL.
 |---|---|
 | [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Componentes, API e modelo de dados |
 | [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md) | Variáveis de ambiente, Supabase, Vercel e checklist de lançamento |
+| [`docs/REGISTRO_SOFTWARE.md`](docs/REGISTRO_SOFTWARE.md) | Registro do programa de computador pela AGIR/UFRN |
 | [`CHANGELOG.md`](CHANGELOG.md) | Histórico de versões |
 | [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Licenças de componentes de terceiros |
 | `public/termos.html` | Termos de uso (publicados no site) |

@@ -4,6 +4,9 @@
   "private": true,
   "description": "Consultas à grade curricular do TADS/UFRN em PostgreSQL",
   "author": "Ayron Matos",
+  "contributors": [
+    "Heitor Felipe"
+  ],
   "license": "SEE LICENSE IN LICENSE",
   "main": "server.js",
   "scripts": {
