@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Política de Privacidade - Grade TADS</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    try {
+      const tema = localStorage.getItem('tema');
+      if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+    } catch {}
+  </script>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <main class="pagina documento">
+    <a class="voltar" href="/">← Voltar para a Grade TADS</a>
+    <article class="documento-cartao">
+      <h1>Política de Privacidade</h1>
+      <p class="documento-data">Última atualização: novembro de 2026</p>
+      <p>Esta política explica como o site Grade TADS trata dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018, LGPD). O controlador é Ayron Matos.</p>
+
+      <h2>1. Histórico escolar (PDF)</h2>
+      <p>Na função "O que posso cursar", você pode importar o histórico do SIGAA. O arquivo é lido <strong>inteiramente no seu navegador</strong>: ele <strong>não é enviado</strong> ao nosso servidor nem armazenado em lugar nenhum. Do conteúdo, são usados apenas os códigos das disciplinas, a situação delas, o currículo e o primeiro nome, que aparece na tela. CPF, documento e data de nascimento não são usados. Ao fechar ou recarregar a página, essas informações são descartadas.</p>
+
+      <h2>2. O que fica salvo no seu navegador</h2>
+      <p>Apenas a sua preferência de tema (claro, escuro ou do sistema), guardada no armazenamento local do navegador. Não usamos cookies de rastreamento, publicidade ou análise.</p>
+
+      <h2>3. Consultas à grade</h2>
+      <p>As perguntas que você faz (por exemplo, os pré-requisitos de uma disciplina) são enviadas ao servidor para consultar o banco de dados. Elas não são associadas a você nem armazenadas como histórico.</p>
+
+      <h2>4. Serviços de terceiros</h2>
+      <p>Para funcionar, o site usa serviços que podem receber dados técnicos da sua conexão, como o endereço IP e o tipo de navegador:</p>
+      <ul>
+        <li><strong>Vercel:</strong> hospedagem do site, com registros técnicos de acesso;</li>
+        <li><strong>Supabase:</strong> hospedagem do banco de dados com a grade curricular;</li>
+        <li><strong>Google Fonts:</strong> fornecimento das fontes do site;</li>
+        <li><strong>cdnjs (Cloudflare):</strong> fornecimento da biblioteca que lê o PDF, carregada apenas quando você importa um histórico.</li>
+      </ul>
+      <p>Cada serviço segue a sua própria política de privacidade.</p>
+
+      <h2>5. Seus direitos</h2>
+      <p>Pela LGPD, você pode solicitar informações sobre o tratamento dos seus dados, além de correção ou exclusão, quando aplicável. Como o site não mantém cadastro nem armazena dados pessoais no servidor, na prática não há dados seus guardados por nós.</p>
+
+      <h2>6. Contato</h2>
+      <p>Dúvidas sobre privacidade: <strong>[e-mail de contato do titular]</strong>.</p>
+    </article>
+  </main>
+</body>
+</html>

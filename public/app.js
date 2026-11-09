@@ -37,7 +37,41 @@ function bonito(texto) {
 const anoDa = (estrutura) => estrutura.replace(/\D/g, '') || estrutura;
 
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// Tema: claro, escuro ou o do sistema (a escolha fica salva no navegador)
+// ---------------------------------------------------------------------
+function aplicarTema(tema) {
+  if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+  else delete document.documentElement.dataset.tema;
+  try {
+    if (tema === 'claro' || tema === 'escuro') localStorage.setItem('tema', tema);
+    else localStorage.removeItem('tema');
+  } catch { /* navegador sem armazenamento: o tema vale só nesta visita */ }
+  document.querySelectorAll('.temas button').forEach((b) => b.setAttribute('aria-checked', b.dataset.tema === tema));
+}
+
+function prepararTemas() {
+  let atual = 'sistema';
+  try { atual = localStorage.getItem('tema') || 'sistema'; } catch { /* ignora */ }
+  aplicarTema(atual);
+  const grupo = document.querySelector('.temas');
+  grupo?.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-tema]');
+    if (b) aplicarTema(b.dataset.tema);
+  });
+  // setas do teclado trocam a opção, como num grupo de rádio
+  grupo?.addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    const botoes = [...grupo.querySelectorAll('button')];
+    const i = botoes.findIndex((b) => b.getAttribute('aria-checked') === 'true');
+    const prox = botoes[(i + (e.key === 'ArrowRight' ? 1 : botoes.length - 1)) % botoes.length];
+    aplicarTema(prox.dataset.tema);
+    prox.focus();
+  });
+}
+
 async function iniciar() {
+  prepararTemas();
   try {
     consultas = await (await fetch('/api/consultas')).json();
     const r = await fetch('/api/opcoes');
@@ -295,6 +329,8 @@ function atualizarCabecalho(estrutura) {
   if (!det) return;
   $('#nomeCurso').textContent = `${det.curso}, ${det.instituicao}`;
   $('#cargas').innerHTML = `
+    <span class="carga" title="Créditos das disciplinas obrigatórias da grade ${esc(nomeGrade(det.codigo))}">
+      <b>${det.creditos_obrigatorios} créditos</b> obrigatórios <i>${det.creditos_obrigatorios * 15} h</i></span>
     <span class="carga" title="Créditos de disciplinas optativas exigidos na grade ${esc(nomeGrade(det.codigo))}">
       <b>${det.credito_optativas} créditos</b> optativos <i>${det.credito_optativas * 15} h</i></span>
     <span class="carga" title="Horas de atividades complementares exigidas na grade ${esc(nomeGrade(det.codigo))}">
@@ -307,7 +343,8 @@ function atualizarDependentes() {
   const campoEstrutura = campos.find((f) => f.tipo === 'estrutura');
   if (campoEstrutura) {
     const maisNova = [...opcoes.estruturas].sort().reverse()[0] || '';
-    definirOpcoes('estrutura', opcoesDoCampo(campoEstrutura), campoEstrutura.obrigatorio ? maisNova : '');
+    const comecaNaMaisNova = campoEstrutura.obrigatorio || tipoAtual === 'libera';
+    definirOpcoes('estrutura', opcoesDoCampo(campoEstrutura), comecaNaMaisNova ? maisNova : '');
   }
   const estrutura = $('#frase input[name="estrutura"]')?.value || '';
   atualizarCabecalho(estrutura);
@@ -761,7 +798,7 @@ function desenharGradeFluxo(ctx, dados) {
       <svg class="mapa-fios" aria-hidden="true"><g class="fios-base"></g><g class="fios-ativos"></g></svg>
       ${linhas}
     </div></div>
-    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o fluxo completo; clique de novo na mesma disciplina para soltar.</p>`;
+    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul); clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>`;
 }
 
 // caminho com cantos arredondados passando pelos pontos dados
@@ -825,18 +862,19 @@ function desenharFios(mapa) {
       pontos = [[sx, s.b], [sx, y1], [cx, y1], [cx, y2], [tx, y2], [tx, t.t]];
     }
     a.d = caminhoArredondado(pontos);
+    a.dInverso = caminhoArredondado([...pontos].reverse());   // para o fluxo de pré-requisitos
     return `<path class="fio ${a.alt ? 'alt' : ''}" d="${a.d}"/>`;
   }).join('');
   svg.querySelector('.fios-base').innerHTML = fios;
   // se havia um fluxo aceso, refaz com os fios nas posições novas
-  if (mapa._fonte) ativarFluxo(mapa, mapa._fonte, mapa._cascata, true);
+  if (mapa._fonte) ativarFluxo(mapa, mapa._fonte, mapa._cascata, true, mapa._sentido);
 }
 
 function limparFluxo(mapa) {
   (mapa._timers || []).forEach(clearTimeout);
   mapa._timers = [];
   mapa._fonte = null;
-  mapa.classList.remove('focando');
+  mapa.classList.remove('focando', 'modo-requer');
   mapa.querySelector('.fios-ativos').innerHTML = '';
   mapa.querySelectorAll('.fonte-ativa, .alcancado, .emissor').forEach((el) => {
     el.classList.remove('fonte-ativa', 'alcancado', 'emissor');
@@ -845,7 +883,9 @@ function limparFluxo(mapa) {
 }
 
 // enche os fios de azul a partir da disciplina; com "cascata", segue nível a nível
-function ativarFluxo(mapa, codigo, cascata, refazer = false) {
+// sentido "libera": azul, da disciplina para o que ela libera (para baixo)
+// sentido "requer": verde, da disciplina para os pré-requisitos dela (para cima)
+function ativarFluxo(mapa, codigo, cascata, refazer = false, sentido = 'libera') {
   const dadosMapa = mapasNaTela[Number(mapa.dataset.mapa)];
   if (!dadosMapa) return;
   if (!refazer && mapa._fonte === codigo && !cascata) return;
@@ -853,7 +893,10 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false) {
   limparFluxo(mapa);
   mapa._fonte = codigo;
   mapa._cascata = cascata;
+  mapa._sentido = sentido;
+  const inverso = sentido === 'requer';
   mapa.classList.add('focando');
+  if (inverso) mapa.classList.add('modo-requer');
   mapa.querySelector(`.mapa-disc[data-cod="${codigo}"]`)?.classList.add('fonte-ativa');
 
   const reduzir = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -864,19 +907,24 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false) {
   // cada disciplina que solta fios ganha o próximo tom de azul da sequência
   let proximoTom = 0;
   const tomDe = {};
-  const tomPara = (c) => (tomDe[c] ??= `var(--tom-${(proximoTom++ % TONS) + 1})`);
+  const paleta = inverso ? 'verde' : 'tom';
+  const tomPara = (c) => (tomDe[c] ??= `var(--${paleta}-${(proximoTom++ % TONS) + 1})`);
+  // no sentido inverso, o fio sai da disciplina que exige e chega no pré-requisito
+  const origem = (a) => (inverso ? a.para : a.de);
+  const destino = (a) => (inverso ? a.de : a.para);
+  const caminho = (a) => (inverso ? a.dInverso : a.d);
 
   const visitados = new Set([codigo]);
   let fronteira = [codigo];
   let nivel = 0;
   while (fronteira.length) {
     const arestas = dadosMapa.arestas
-      .filter((a) => fronteira.includes(a.de) && a.d)
-      .sort((x, y) => fronteira.indexOf(x.de) - fronteira.indexOf(y.de));
+      .filter((a) => fronteira.includes(origem(a)) && a.d)
+      .sort((x, y) => fronteira.indexOf(origem(x)) - fronteira.indexOf(origem(y)));
     if (!arestas.length) break;
     const atraso = nivel * DUR;
     // o cartão que solta fios passa a ter a borda na cor dos fios dele
-    [...new Set(arestas.map((a) => a.de))].forEach((emissor) => {
+    [...new Set(arestas.map(origem))].forEach((emissor) => {
       const tom = tomPara(emissor);
       if (emissor !== codigo) {
         mapa._timers.push(setTimeout(() => {
@@ -886,23 +934,23 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false) {
       }
     });
     arestas.forEach((a) => {
-      const tom = tomPara(a.de);
+      const tom = tomPara(origem(a));
       const carga = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      carga.setAttribute('d', a.d);
+      carga.setAttribute('d', caminho(a));
       carga.setAttribute('pathLength', '100');
       carga.setAttribute('class', `fio-carga ${a.alt ? 'alt' : ''}`);
       carga.style.setProperty('--tom', tom);
       carga.style.animationDelay = `${atraso}ms`;
       ativos.appendChild(carga);
       mapa._timers.push(setTimeout(() => {
-        const alvo = cartaoDe(a.para);
+        const alvo = cartaoDe(destino(a));
         if (alvo) {
           if (!alvo.classList.contains('alcancado') && !alvo.classList.contains('emissor')) alvo.style.setProperty('--tom', tom);
           alvo.classList.add('alcancado');
         }
         if (reduzir) return;
         const pulso = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        pulso.setAttribute('d', a.d);
+        pulso.setAttribute('d', caminho(a));
         pulso.setAttribute('pathLength', '100');
         pulso.setAttribute('class', 'fio-pulso');
         pulso.style.setProperty('--tom', tom);
@@ -910,7 +958,7 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false) {
       }, atraso + DUR));
     });
     if (!cascata) break;
-    fronteira = [...new Set(arestas.map((a) => a.para))].filter((c) => !visitados.has(c));
+    fronteira = [...new Set(arestas.map(destino))].filter((c) => !visitados.has(c));
     fronteira.forEach((c) => visitados.add(c));
     nivel++;
   }
@@ -938,17 +986,22 @@ function prepararMapas() {
         return;
       }
       const cod = disc.dataset.cod;
-      mapa.querySelector('.mapa-disc.fixado')?.classList.remove('fixado');
-      mapa.querySelectorAll('.mapa-disc').forEach((d) => d.removeAttribute('aria-pressed'));
-      if (mapa._fixo === cod) {
+      const anterior = mapa.querySelector('.mapa-disc.fixado');
+      anterior?.classList.remove('fixado');
+      anterior?.removeAttribute('aria-pressed');
+      anterior?.removeAttribute('data-selo');
+      // mesma disciplina: do azul vai para o verde; do verde, solta
+      if (mapa._fixo === cod && mapa._sentido === 'requer') {
         mapa._fixo = null;
         limparFluxo(mapa);
         return;
       }
+      const sentido = mapa._fixo === cod ? 'requer' : 'libera';
       mapa._fixo = cod;
       disc.classList.add('fixado');
       disc.setAttribute('aria-pressed', 'true');
-      ativarFluxo(mapa, cod, true, true);
+      disc.dataset.selo = sentido === 'requer' ? 'Pré-requisitos' : 'O que libera';
+      ativarFluxo(mapa, cod, true, true, sentido);
     });
   });
 }

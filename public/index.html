@@ -11,6 +11,13 @@
   <link rel="icon" type="image/png" sizes="64x64" href="img/favicon-64.png">
   <link rel="apple-touch-icon" href="img/favicon-180.png">
   <link rel="stylesheet" href="style.css">
+  <script>
+    // aplica o tema escolhido antes de desenhar a página (evita piscar)
+    try {
+      const tema = localStorage.getItem('tema');
+      if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+    } catch {}
+  </script>
 </head>
 <body>
   <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -23,6 +30,20 @@
         <span class="cargas" id="cargas" aria-live="polite"></span>
       </span>
     </a>
+    <div class="temas" role="radiogroup" aria-label="Tema da página">
+      <button type="button" role="radio" data-tema="claro" aria-checked="false" title="Tema claro">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+        <span>Claro</span>
+      </button>
+      <button type="button" role="radio" data-tema="escuro" aria-checked="false" title="Tema escuro">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+        <span>Escuro</span>
+      </button>
+      <button type="button" role="radio" data-tema="sistema" aria-checked="true" title="Seguir o tema do sistema">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
+        <span>Sistema</span>
+      </button>
+    </div>
   </header>
 
   <main class="pagina">
@@ -39,6 +60,13 @@
       <p class="vazio">Carregando a grade…</p>
     </section>
   </main>
+
+  <footer class="rodape">
+    <p>© 2026 Ayron Matos. Todos os direitos reservados.
+      <a href="termos.html">Termos de uso</a>
+      <a href="privacidade.html">Privacidade</a></p>
+    <p>Projeto independente, não é um serviço oficial da UFRN. As informações são apenas informativas; confira sempre o SIGAA e a coordenação do curso.</p>
+  </footer>
 
   <script src="app.js"></script>
 </body>

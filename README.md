@@ -1,35 +1,52 @@
-# Grade curricular TADS/UFRN
+# Grade TADS
 
-Site para consultar a grade curricular do TADS (estruturas 2015 e 2019):
-pré-requisitos, o que cada disciplina libera, grade completa por período
-e o que você já pode cursar (com importação do histórico do SIGAA).
+> **Software proprietário.** Copyright © 2026 Ayron Matos. Todos os direitos
+> reservados. É proibido copiar, modificar ou distribuir este código sem
+> autorização escrita do titular. Veja [`LICENSE`](LICENSE).
 
-**Tecnologias:** Node.js + Express no servidor, PostgreSQL como banco,
-HTML/CSS/JS puro na página.
+Site para consultar a grade curricular do curso de Análise e Desenvolvimento
+de Sistemas da UFRN (estruturas 2015 e 2019).
 
-## Estrutura
+## Funcionalidades
 
-| Arquivo | Função |
+- **Perguntas em forma de frase:** "O que preciso ter cursado para fazer *Projetos Aplicados I* na grade *TADS 2019*?"
+- **Pré-requisitos:** cadeia completa até a base, com conexões animadas.
+- **O que libera:** fluxo das disciplinas que dependem da escolhida.
+- **Grade completa:** mapa por período; passar o mouse mostra o que a disciplina libera,
+  o primeiro clique fixa esse fluxo (azul) e o segundo mostra os pré-requisitos (verde).
+- **O que posso cursar:** marcação das disciplinas concluídas ou importação do
+  histórico do SIGAA em PDF, lido no próprio navegador.
+- **Cabeçalho com cargas horárias** obrigatórias, optativas e complementares.
+- **Tema claro, escuro ou do sistema.**
+
+## Tecnologias
+
+Node.js e Express no servidor, PostgreSQL (Supabase) como banco, HTML, CSS e
+JavaScript puros na página. Hospedagem na Vercel.
+
+## Começando
+
+```
+cp .env.example .env    # preencha a conexão com o banco
+npm install
+npm start
+```
+
+Para criar o banco, rode `sql/banco_completo.sql` no PostgreSQL.
+
+## Documentação
+
+| Documento | Conteúdo |
 |---|---|
-| `server.js` | Servidor e API (`/api/consulta`, `/api/opcoes`, `/api/status`) |
-| `consultas.js` | As consultas em SQL |
-| `db.js` | Conexão com o PostgreSQL |
-| `config.js` | Lê a configuração do `.env` |
-| `sql/banco_completo.sql` | Cria e popula o banco |
-| `public/` | A página |
-| `.github/workflows/manter-ativo.yml` | Evita a pausa do Supabase gratuito |
+| [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | Componentes, API e modelo de dados |
+| [`docs/IMPLANTACAO.md`](docs/IMPLANTACAO.md) | Variáveis de ambiente, Supabase, Vercel e checklist de lançamento |
+| [`CHANGELOG.md`](CHANGELOG.md) | Histórico de versões |
+| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Licenças de componentes de terceiros |
+| `public/termos.html` | Termos de uso (publicados no site) |
+| `public/privacidade.html` | Política de privacidade (publicada no site) |
 
-## Rodar no computador
+## Aviso
 
-1. Crie o banco: rode `sql/banco_completo.sql` no pgAdmin (Query Tool).
-2. Copie `.env.example` para `.env` e preencha usuário, senha, porta e banco.
-3. No terminal, na pasta do projeto:
-   ```
-   npm install
-   npm start
-   ```
-4. Abra http://localhost:3000
-
-## Publicar (Supabase + Vercel, gratuito)
-
-Veja o passo a passo completo nas instruções do projeto.
+Projeto independente, sem vínculo oficial com a UFRN. As informações
+curriculares são apenas informativas e não substituem o SIGAA nem a
+orientação da coordenação do curso.

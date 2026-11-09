@@ -28,6 +28,13 @@
   --tom-4: #0e9fb5;
   --tom-5: #7c3aed;
   --tom-6: #1d4ed8;
+  /* tons de verde do fluxo de pré-requisitos (sentido inverso) */
+  --verde-1: #2f9e5f;
+  --verde-2: #457e51;
+  --verde-3: #0f9d8a;
+  --verde-4: #65a30d;
+  --verde-5: #15803d;
+  --verde-6: #4d7c0f;
   --sublinhado: #457e51;
 
   /* uma cor por banco, todas da família do logotipo */
@@ -42,7 +49,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-tema="claro"]) {
     --papel: #0f0b2e;
     --folha: #18123f;
     --tinta: #eef0fb;
@@ -59,6 +66,12 @@
     --tom-4: #2dd4e6;
     --tom-5: #b08cff;
     --tom-6: #93c5fd;
+    --verde-1: #42d392;
+    --verde-2: #8bd17c;
+    --verde-3: #2dd4bf;
+    --verde-4: #a3e635;
+    --verde-5: #5fcf8d;
+    --verde-6: #6ee7b7;
     --sublinhado: #6fd49a;
     --baoba-texto: #6fd49a;
     --postgres: #35b0f0;
@@ -67,6 +80,38 @@
     color-scheme: dark;
   }
 }
+/* tema escuro escolhido manualmente */
+  :root[data-tema="escuro"] {
+    --papel: #0f0b2e;
+    --folha: #18123f;
+    --tinta: #eef0fb;
+    --tinta-suave: #a7a9c9;
+    --linha: #2d2660;
+    --marca-texto: rgba(66, 191, 132, 0.42);
+    --foco: #33c2f5;
+    --erro: #ff8787;
+    --certo: #6fd49a;
+    --arco: rgba(66, 191, 132, 0.16);
+    --tom-1: #33c2f5;
+    --tom-2: #60a5fa;
+    --tom-3: #8b8ff8;
+    --tom-4: #2dd4e6;
+    --tom-5: #b08cff;
+    --tom-6: #93c5fd;
+    --verde-1: #42d392;
+    --verde-2: #8bd17c;
+    --verde-3: #2dd4bf;
+    --verde-4: #a3e635;
+    --verde-5: #5fcf8d;
+    --verde-6: #6ee7b7;
+    --sublinhado: #6fd49a;
+    --baoba-texto: #6fd49a;
+    --postgres: #35b0f0;
+    --mongo: #5fcf8d;
+    --neo4j: #9d87ff;
+    color-scheme: dark;
+  }
+
 
 * { box-sizing: border-box; }
 
@@ -784,12 +829,19 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   --aurora-3: rgba(39, 23, 111, 0.16);    /* índigo do "UFRN" */
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-tema="claro"]) {
     --aurora-1: rgba(66, 191, 132, 0.28);
     --aurora-2: rgba(0, 175, 239, 0.26);
     --aurora-3: rgba(124, 92, 235, 0.42);
   }
 }
+/* tema escuro escolhido manualmente */
+  :root[data-tema="escuro"] {
+    --aurora-1: rgba(66, 191, 132, 0.28);
+    --aurora-2: rgba(0, 175, 239, 0.26);
+    --aurora-3: rgba(124, 92, 235, 0.42);
+  }
+
 .aurora {
   position: fixed;
   inset: 0;
@@ -845,7 +897,7 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 /* disciplina com o fluxo fixado na grade */
 .mapa-disc.fixado { position: relative; }
 .mapa-disc.fixado::after {
-  content: "Fixado";
+  content: attr(data-selo);
   position: absolute; top: -9px; right: 8px;
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.02em;
   padding: 1px 7px; border-radius: 999px;
@@ -858,3 +910,72 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 .resposta.carregando { opacity: 0.55; }
 .vazio.erro { color: var(--erro); }
 @media (prefers-reduced-motion: reduce) { .resposta { transition: none; } }
+
+/* seletor de tema: claro, escuro ou do sistema */
+.temas {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--linha);
+  background: color-mix(in srgb, var(--folha) 80%, transparent);
+}
+.temas button {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: inherit; font-size: 0.82rem; font-weight: 600;
+  color: var(--tinta-suave);
+  background: transparent; border: 0; cursor: pointer;
+  padding: 6px 12px; border-radius: 999px;
+}
+.temas svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.temas button:hover { color: var(--tinta); }
+.temas button[aria-checked="true"] { background: var(--baoba); color: #fff; }
+@media (max-width: 720px) {
+  .temas span { display: none; }
+  .temas button { padding: 7px 9px; }
+}
+
+/* fluxo de pré-requisitos (segundo clique): disciplina de origem em verde */
+.mapa.modo-requer .mapa-disc.fonte-ativa {
+  background: linear-gradient(135deg, var(--baoba), color-mix(in srgb, var(--menta) 75%, var(--baoba)));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--menta) 28%, transparent);
+}
+.mapa.modo-requer .mapa-disc.fixado::after { color: var(--baoba); }
+
+/* cabeçalho: o seletor de tema fica à direita; as etiquetas quebram de linha se faltar espaço */
+@media (min-width: 721px) {
+  .topo { flex-wrap: nowrap; align-items: flex-start; }
+  .marca { flex: 1 1 auto; min-width: 0; }
+  .temas { flex: none; margin-top: 4px; }
+}
+
+/* rodapé e páginas de documentos legais */
+.rodape {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 8px 24px 40px;
+  font-size: 0.82rem;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+.rodape p { margin: 4px 0; }
+.rodape a { color: var(--tinta-suave); margin-left: 12px; }
+.rodape a:hover { color: var(--tinta); }
+
+.documento { max-width: 820px; padding-top: 32px; }
+.voltar { display: inline-block; margin-bottom: 16px; color: var(--tinta-suave); text-decoration: none; font-weight: 600; }
+.voltar:hover { color: var(--tinta); }
+.documento-cartao {
+  background: var(--folha);
+  border: 1px solid var(--linha);
+  border-radius: 22px;
+  padding: 32px 36px;
+  line-height: 1.7;
+}
+.documento-cartao h1 { font-family: var(--display); font-size: 1.8rem; letter-spacing: -0.02em; margin: 0; }
+.documento-cartao h2 { font-family: var(--display); font-size: 1.1rem; margin: 28px 0 6px; }
+.documento-cartao p, .documento-cartao li { color: var(--tinta-suave); }
+.documento-cartao strong { color: var(--tinta); }
+.documento-cartao a { color: var(--foco); }
+.documento-data { font-size: 0.85rem; margin: 6px 0 10px; }
+@media (max-width: 720px) { .documento-cartao { padding: 22px 18px; } }

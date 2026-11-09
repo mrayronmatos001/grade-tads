@@ -36,7 +36,12 @@ const consultas = {
     sql: () => ({
       texto: `
 SELECT e.codigo, e.ano, e.credito_optativas, e.horas_complementares,
-       c.nome AS curso, c.sigla, c.instituicao
+       c.nome AS curso, c.sigla, c.instituicao,
+       (SELECT COALESCE(SUM(comp.creditos), 0)
+        FROM componente_da_estrutura_curricular cde
+        JOIN componente comp ON comp.codigo = cde.componente_codigo
+        WHERE cde.estrutura_codigo = e.codigo
+          AND cde.natureza = 'OBRIGATORIA') AS creditos_obrigatorios
 FROM estrutura_curricular e
 JOIN curso c ON c.codigo = e.curso_codigo
 ORDER BY e.codigo`,
@@ -45,6 +50,7 @@ ORDER BY e.codigo`,
     normalizar: (linhas) => linhas.map((l) => ({
       codigo: l.codigo, ano: Number(l.ano),
       credito_optativas: Number(l.credito_optativas), horas_complementares: Number(l.horas_complementares),
+      creditos_obrigatorios: Number(l.creditos_obrigatorios),
       curso: l.curso, sigla: l.sigla, instituicao: l.instituicao,
     })),
   },
