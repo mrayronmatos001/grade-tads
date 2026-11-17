@@ -13,8 +13,27 @@ const FRASES = {
 };
 const ROTULOS_CURTOS = {
   buscar: 'Buscar', prerequisitos: 'Pré-requisitos', libera: 'O que libera',
-  grade: 'Grade completa', disponiveis: 'O que posso cursar',
+  grade: 'Grade completa', disponiveis: 'O que posso cursar', sugestoes: 'Sugestões',
 };
+// nomes da barra de navegação do celular
+const ROTULOS_BARRA = {
+  buscar: 'Buscar', prerequisitos: 'Requisitos', libera: 'Libera',
+  grade: 'Grade', disponiveis: 'Cursar', sugestoes: 'Sugestões',
+};
+const ICONES = {
+  buscar: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
+  prerequisitos: '<circle cx="5" cy="5" r="2.2"/><circle cx="5" cy="19" r="2.2"/><circle cx="19" cy="12" r="2.6"/><path d="M7 6.2c4 1 5.5 3.6 9.4 5.2M7 17.8c4-1 5.5-3.6 9.4-5.2"/>',
+  libera: '<circle cx="5" cy="12" r="2.6"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7.6 11.4c4-1.6 5.4-4.2 9.2-5.2M7.6 12.6c4 1.6 5.4 4.2 9.2 5.2"/>',
+  grade: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>',
+  disponiveis: '<circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.3 2.6 2.6 5-5.4"/>',
+  sugestoes: '<path d="M4.5 5.5h15a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-4.5 3.5v-3.5h-1a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/>',
+};
+const htmlAba = (id, titulo, selecionada, extra = '') => `
+  <button type="button" class="tipo ${extra}" role="tab" data-tipo="${id}" title="${esc(titulo)}" aria-selected="${selecionada}">
+    <svg class="tipo-icone" viewBox="0 0 24 24" aria-hidden="true">${ICONES[id] || ''}</svg>
+    <span class="tipo-longo">${esc(ROTULOS_CURTOS[id] || titulo)}</span>
+    <span class="tipo-curto" aria-hidden="true">${esc(ROTULOS_BARRA[id] || titulo)}</span>
+  </button>`;
 
 let consultas = [];
 let opcoes = { estruturas: [], componentes: {} };
@@ -83,11 +102,8 @@ async function iniciar() {
     if (!consultas.length) return;
   }
 
-  $('#tipos').innerHTML = consultas.map((c) => `
-    <button type="button" class="tipo" role="tab" data-tipo="${c.id}" title="${esc(c.descricao)}"
-      aria-selected="${c.id === tipoAtual}">${esc(ROTULOS_CURTOS[c.id] || c.titulo)}</button>`).join('')
-    + `<button type="button" class="tipo tipo-sugestoes" role="tab" data-tipo="sugestoes" aria-selected="false"
-        title="Envie uma sugestão ou avise sobre um erro">Sugestões</button>`;
+  $('#tipos').innerHTML = consultas.map((c) => htmlAba(c.id, c.descricao, c.id === tipoAtual)).join('')
+    + htmlAba('sugestoes', 'Envie uma sugestão ou avise sobre um erro', false, 'tipo-sugestoes');
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
     if (!botao) return;
@@ -95,7 +111,8 @@ async function iniciar() {
     fecharDetalhe();
     tipoAtual = botao.dataset.tipo;
     document.querySelectorAll('.tipo').forEach((b) => b.setAttribute('aria-selected', b === botao));
-    botao.scrollIntoView({ block: 'nearest', inline: 'center', behavior: semAnimacao() ? 'auto' : 'smooth' });
+    // no celular, a barra fica embaixo: ao trocar de aba, volta para o topo da pergunta
+    if (ehCelular()) window.scrollTo({ top: 0, behavior: semAnimacao() ? 'auto' : 'smooth' });
     if (tipoAtual === 'sugestoes') mostrarSugestoes();
     else montarFrase();
   });
@@ -1181,6 +1198,10 @@ function abrirDetalhe(mapa, codigo, sentido) {
       <div><dt>Carga horária</dt><dd>${horasDe(creditos)} h</dd></div>
       <div class="destaque"><dt>Limite de faltas</dt><dd>${limiteFaltas(creditos)}</dd></div>
     </dl>
+    <div class="detalhe-linha-curta">
+      <p class="detalhe-resumo"><b>${creditos}</b> créditos · <b>${horasDe(creditos)} h</b> · até <b>${limiteFaltas(creditos)}</b> faltas</p>
+      <button type="button" class="detalhe-expandir" aria-expanded="false">Ver mais</button>
+    </div>
     <p class="detalhe-nota">Máximo de faltas para não reprovar por frequência: a UFRN exige 75% de presença,
       com aulas de 50 minutos. Atividades de orientação, como o TCC, podem seguir regras próprias.</p>
     <section class="${sentido === 'requer' ? 'ativo-requer' : ''}">
@@ -1199,6 +1220,7 @@ function abrirDetalhe(mapa, codigo, sentido) {
     </section>`;
   painel.hidden = false;
   painel.scrollTop = 0;
+  painel.classList.add('recolhido');       // no celular, começa compacto
   document.body.classList.add('com-detalhe');
   if (ehCelular()) {
     const card = mapa.querySelector(`.mapa-disc[data-cod="${codigo}"]`);
@@ -1231,6 +1253,15 @@ function fecharDetalhe() {
 function prepararDetalhe() {
   const painel = $('#detalhe');
   painel.addEventListener('click', (e) => {
+    const expandir = e.target.closest('.detalhe-expandir');
+    if (expandir) {
+      const recolher = !painel.classList.contains('recolhido');
+      painel.classList.toggle('recolhido', recolher);
+      expandir.setAttribute('aria-expanded', String(!recolher));
+      expandir.textContent = recolher ? 'Ver mais' : 'Recolher';
+      painel.scrollTop = 0;
+      return;
+    }
     if (e.target.closest('.detalhe-fechar')) {
       if (mapaDoDetalhe) soltarMapa(mapaDoDetalhe); else fecharDetalhe();
       return;

@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 2.6.0
+- Celular: as abas viraram uma barra de navegação fixa no rodapé, com ícone
+  e nome curto (Buscar, Requisitos, Libera, Grade, Cursar, Sugestões),
+  sempre visível e sem precisar deslizar.
+- Celular: os detalhes da disciplina na grade completa abrem como um cartão
+  compacto acima da barra (nome, créditos, horas e faltas numa linha), com
+  "Ver mais" para a ementa, os pré-requisitos e o que ela libera.
+
 ## 2.5.0
 - Layout de celular (até 720 px) refeito para toque e uma mão:
   - cabeçalho compacto, com as cargas horárias numa linha deslizante e o

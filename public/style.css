@@ -1344,3 +1344,83 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   .frase { font-size: 1.25rem; }
   .mapa-linha, .etapa-itens, .grade-cartoes, .coluna-nos { gap: 8px; }
 }
+
+/* =====================================================================
+   Abas com ícone (barra de navegação no celular) e detalhes recolhíveis
+   ===================================================================== */
+.tipo-icone, .tipo-curto, .detalhe-linha-curta { display: none; }
+
+@media (max-width: 720px) {
+  /* a pergunta deixa de recortar a barra fixa (os arcos decorativos somem no celular) */
+  .pergunta { isolation: auto; }
+  .pergunta::before { display: none; }
+
+  /* barra de navegação fixa embaixo, sempre visível, ao alcance do polegar */
+  #tipos {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 2px;
+    margin: 0; overflow: visible;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--folha) 90%, transparent);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border-top: 1px solid var(--linha);
+    box-shadow: 0 -8px 24px -12px rgba(15, 10, 50, 0.35);
+    -webkit-mask-image: none; mask-image: none;
+  }
+  #tipos .tipo {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    min-height: 54px; padding: 6px 2px;
+    border: 0; border-radius: 14px; background: transparent;
+    font-size: 0.68rem; font-weight: 600; line-height: 1.1;
+    color: var(--tinta-suave);
+    scroll-snap-align: none;
+  }
+  #tipos .tipo-icone {
+    display: block; width: 23px; height: 23px;
+    fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+  }
+  #tipos .tipo-longo { display: none; }
+  #tipos .tipo-curto { display: block; white-space: nowrap; }
+  #tipos .tipo[aria-selected="true"] {
+    color: var(--baoba-texto, var(--baoba));
+    background: color-mix(in srgb, var(--menta) 16%, transparent);
+  }
+  #tipos .tipo[aria-selected="true"] .tipo-icone { stroke-width: 2.3; }
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  .frase { margin-top: 2px; }
+
+  /* detalhes: cartão compacto flutuando acima da barra; "Ver mais" abre o resto */
+  .detalhe {
+    left: 8px; right: 8px; top: auto;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    max-height: 68vh; border-radius: 18px; border-bottom: 1px solid var(--linha);
+    padding: 12px 14px 14px;
+    box-shadow: 0 -6px 30px -8px rgba(15, 10, 50, 0.45);
+  }
+  .detalhe::before { display: none; }
+  .detalhe h2 { font-size: 1.02rem; margin-top: 6px; }
+  .detalhe-topo .detalhe-fechar { width: 32px; height: 32px; font-size: 1.2rem; }
+  .detalhe-numeros { margin: 10px 0 10px; gap: 6px; }
+  .detalhe-numeros div { padding: 6px 8px; border-radius: 10px; }
+  .detalhe-numeros dt { font-size: 0.66rem; }
+  .detalhe-numeros dd { font-size: 1rem; }
+  .detalhe-linha-curta {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 8px;
+  }
+  .detalhe-resumo { margin: 0; font-size: 0.86rem; color: var(--tinta-suave); }
+  .detalhe-resumo b { color: var(--tinta); font-weight: 800; }
+  .detalhe-expandir {
+    flex: none; margin-left: auto;
+    font: inherit; font-size: 0.82rem; font-weight: 700;
+    padding: 8px 14px; border-radius: 999px;
+    color: #fff; background: var(--baoba);
+    border: 0; cursor: pointer;
+  }
+  .detalhe.recolhido .detalhe-numeros,
+  .detalhe.recolhido .detalhe-nota,
+  .detalhe.recolhido section,
+  .detalhe:not(.recolhido) .detalhe-resumo { display: none; }
+  .detalhe.recolhido .detalhe-topo { align-items: center; }
+  body.com-detalhe { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+}
