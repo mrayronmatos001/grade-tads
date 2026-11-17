@@ -979,3 +979,78 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 .documento-cartao a { color: var(--foco); }
 .documento-data { font-size: 0.85rem; margin: 6px 0 10px; }
 @media (max-width: 720px) { .documento-cartao { padding: 22px 18px; } }
+
+/* =====================================================================
+   Painel de detalhes da disciplina (grade completa)
+   ===================================================================== */
+.detalhe {
+  position: fixed;
+  top: 16px; right: 16px; bottom: 16px;
+  width: min(390px, calc(100vw - 32px));
+  z-index: 40;
+  overflow-y: auto;
+  background: var(--folha);
+  color: var(--tinta);
+  border: 1px solid var(--linha);
+  border-radius: 20px;
+  padding: 20px 22px 24px;
+  box-shadow: 0 24px 60px -20px rgba(39, 23, 111, 0.55), 0 2px 8px rgba(39, 23, 111, 0.1);
+  animation: entrar-detalhe 220ms cubic-bezier(.2, .8, .2, 1);
+}
+.detalhe[hidden] { display: none; }
+@keyframes entrar-detalhe { from { opacity: 0; transform: translateX(24px); } }
+.detalhe-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.detalhe-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; font-size: 0.82rem; color: var(--tinta-suave); }
+.detalhe h2 { font-family: var(--display); font-size: 1.3rem; line-height: 1.3; letter-spacing: -0.01em; margin: 8px 0 0; }
+.detalhe-fechar {
+  flex: none;
+  width: 36px; height: 36px;
+  font: inherit; font-size: 1.4rem; line-height: 1;
+  color: var(--tinta-suave);
+  background: var(--papel);
+  border: 1px solid var(--linha);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.detalhe-fechar:hover { color: var(--tinta); }
+
+.detalhe-numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 8px; }
+.detalhe-numeros div { background: var(--papel); border: 1px solid var(--linha); border-radius: 12px; padding: 10px 12px; }
+.detalhe-numeros dt { font-size: 0.72rem; font-weight: 600; color: var(--tinta-suave); }
+.detalhe-numeros dd { margin: 2px 0 0; font-family: var(--display); font-weight: 800; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.detalhe-numeros .destaque { border-color: var(--sublinhado); background: color-mix(in srgb, var(--menta) 12%, var(--folha)); }
+.detalhe-nota { font-size: 0.78rem; color: var(--tinta-suave); line-height: 1.5; margin: 0 0 6px; }
+
+.detalhe section { margin-top: 18px; }
+.detalhe h3 { font-family: var(--display); font-size: 0.95rem; margin: 0 0 8px; }
+.detalhe section.ativo-libera h3 { color: var(--ciano); }
+.detalhe section.ativo-requer h3 { color: var(--baoba-texto, var(--baoba)); }
+.detalhe-chips { display: flex; flex-direction: column; gap: 6px; }
+.detalhe-chip {
+  display: flex; align-items: baseline; gap: 8px;
+  width: 100%;
+  font: inherit; font-size: 0.86rem; text-align: left; color: var(--tinta);
+  background: var(--papel);
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+.detalhe-chip:hover { border-color: var(--menta); }
+.detalhe-chip code { font-family: var(--mono); font-size: 0.72rem; color: var(--tinta-suave); }
+.detalhe-ou { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1.5px dashed var(--sublinhado); border-radius: 12px; }
+.detalhe-ou > span { font-size: 0.75rem; font-weight: 700; color: var(--baoba-texto, var(--baoba)); }
+.detalhe-vazio { font-size: 0.86rem; color: var(--tinta-suave); margin: 0; }
+.detalhe-ementa { font-size: 0.9rem; line-height: 1.65; color: var(--tinta); margin: 0; }
+.detalhe-fonte { font-size: 0.72rem; color: var(--tinta-suave); margin: 8px 0 0; }
+
+/* celular: o painel vira uma folha que sobe de baixo */
+@media (max-width: 720px) {
+  .detalhe {
+    top: auto; left: 8px; right: 8px; bottom: 8px;
+    width: auto; max-height: 72vh;
+    animation-name: subir-detalhe;
+  }
+  @keyframes subir-detalhe { from { opacity: 0; transform: translateY(24px); } }
+}
+@media (prefers-reduced-motion: reduce) { .detalhe { animation: none; } }

@@ -72,6 +72,7 @@ function prepararTemas() {
 
 async function iniciar() {
   prepararTemas();
+  prepararDetalhe();
   try {
     consultas = await (await fetch('/api/consultas')).json();
     const r = await fetch('/api/opcoes');
@@ -89,6 +90,7 @@ async function iniciar() {
     const botao = e.target.closest('.tipo');
     if (!botao) return;
     fecharEscolha(false);
+    fecharDetalhe();
     tipoAtual = botao.dataset.tipo;
     document.querySelectorAll('.tipo').forEach((b) => b.setAttribute('aria-selected', b === botao));
     montarFrase();
@@ -650,6 +652,7 @@ async function executar() {
 }
 
 function mostrar(dados) {
+  fecharDetalhe();
   cadeiasNaTela = [];
   mapasNaTela = [];
   $('#resultado').innerHTML = `<section class="resposta-visual" aria-label="Resposta">
@@ -696,8 +699,9 @@ function montarCadeia(alvo, estrutura, gruposDiretos) {
   const lista = [...nos.values()];
   const codigos = new Set(lista.flatMap((n) => (n.tipo === 'disc' ? [n.codigo] : n.codigos)));
   const niveis = Math.max(0, ...lista.map((n) => n.nivel));
-  const listaArestas = [...arestas.values()].map((a) => ({ ...a, ordem: niveis - a.nivel }));
-  return { nos: lista, arestas: listaArestas, niveis, total: codigos.size };
+  // o pulso sai da disciplina escolhida (direita) e vai até a base (esquerda), nível a nível
+  const listaArestas = [...arestas.values()].map((a) => ({ ...a, ordem: a.nivel - 1 }));
+  return { nos: lista, arestas: listaArestas, niveis, total: codigos.size, inverso: true };
 }
 
 function htmlNo(codigo, estrutura, id, classe = '') {
@@ -787,18 +791,18 @@ function desenharGradeFluxo(ctx, dados) {
         <button type="button" class="mapa-disc" data-cod="${esc(l.codigo)}" title="${esc(bonito(l.nome))}">
           <code class="chip-cod">${esc(l.codigo)}</code>
           <span class="mapa-nome">${esc(bonito(l.nome))}</span>
-          <span class="mapa-cred">${plural(l.creditos, 'crédito', 'créditos')}</span>
+          <span class="mapa-cred">${horasDe(l.creditos)} h · até ${limiteFaltas(l.creditos)} faltas</span>
         </button>`).join('')}</div>
     </div>`;
   }).join('');
 
   return `<p class="resumo">${resumo}</p>
     ${semPeriodo ? '<p class="aviso-fonte">Os períodos ainda não estão no banco. Rode o script de períodos para organizar a grade por semestre.</p>' : ''}
-    <div class="mapa-rolagem"><div class="mapa" data-mapa="${id}" style="--colunas:${colunas}">
+    <div class="mapa-rolagem"><div class="mapa" data-mapa="${id}" data-estrutura="${esc(ctx.estrutura)}" style="--colunas:${colunas}">
       <svg class="mapa-fios" aria-hidden="true"><g class="fios-base"></g><g class="fios-ativos"></g></svg>
       ${linhas}
     </div></div>
-    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul); clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>`;
+    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul) e abrir os detalhes; clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>`;
 }
 
 // caminho com cantos arredondados passando pelos pontos dados
@@ -819,6 +823,8 @@ function caminhoArredondado(pontos, raio = 9) {
 
 // desenha os fios pelos corredores entre os cartões, como no diagrama da grade
 function desenharFios(mapa) {
+  // um mapa que já saiu da tela não é redesenhado (os dados agora são de outro mapa)
+  if (!mapa.isConnected) { mapa._observador?.disconnect(); return; }
   const dadosMapa = mapasNaTela[Number(mapa.dataset.mapa)];
   if (!dadosMapa) return;
   // só redesenha quando o tamanho muda de verdade
@@ -969,7 +975,8 @@ function prepararMapas() {
     const desenhar = () => desenharFios(mapa);
     requestAnimationFrame(desenhar);
     document.fonts?.ready.then(desenhar);
-    new ResizeObserver(desenhar).observe(mapa);
+    mapa._observador = new ResizeObserver(desenhar);
+    mapa._observador.observe(mapa);
     // sem nada fixado, o hover mostra o que a disciplina libera
     const aoPassar = (e) => {
       if (mapa._fixo) return;
@@ -992,8 +999,7 @@ function prepararMapas() {
       anterior?.removeAttribute('data-selo');
       // mesma disciplina: do azul vai para o verde; do verde, solta
       if (mapa._fixo === cod && mapa._sentido === 'requer') {
-        mapa._fixo = null;
-        limparFluxo(mapa);
+        soltarMapa(mapa);
         return;
       }
       const sentido = mapa._fixo === cod ? 'requer' : 'libera';
@@ -1002,7 +1008,107 @@ function prepararMapas() {
       disc.setAttribute('aria-pressed', 'true');
       disc.dataset.selo = sentido === 'requer' ? 'Pré-requisitos' : 'O que libera';
       ativarFluxo(mapa, cod, true, true, sentido);
+      abrirDetalhe(mapa, cod, sentido);
     });
+  });
+}
+
+// solta o fluxo fixado e fecha o painel de detalhes
+function soltarMapa(mapa) {
+  const fixado = mapa.querySelector('.mapa-disc.fixado');
+  fixado?.classList.remove('fixado');
+  fixado?.removeAttribute('aria-pressed');
+  fixado?.removeAttribute('data-selo');
+  mapa._fixo = null;
+  limparFluxo(mapa);
+  fecharDetalhe();
+}
+
+// ---------------------------------------------------------------------
+// Painel de detalhes da disciplina (grade completa)
+// ---------------------------------------------------------------------
+let mapaDoDetalhe = null;
+
+function chipsDetalhe(lista, vazio) {
+  if (!lista.length) return `<p class="detalhe-vazio">${vazio}</p>`;
+  return `<div class="detalhe-chips">${lista.map((g) => (g.length > 1
+    ? `<div class="detalhe-ou"><span>Basta uma destas</span>${g.map((c) => chipDisc(c)).join('')}</div>`
+    : chipDisc(g[0]))).join('')}</div>`;
+}
+function chipDisc(codigo) {
+  return `<button type="button" class="detalhe-chip" data-ir="${esc(codigo)}">
+    <code>${esc(codigo)}</code><span>${esc(bonito(nomeDe(codigo)))}</span></button>`;
+}
+
+function abrirDetalhe(mapa, codigo, sentido) {
+  const estrutura = mapa.dataset.estrutura;
+  const disc = (opcoes.componentes[estrutura] || []).find((c) => c.codigo === codigo);
+  if (!disc) return;
+  mapaDoDetalhe = mapa;
+  const creditos = Number(disc.creditos) || 0;
+  const ementa = (opcoes.ementas || {})[codigo];
+  const requisitos = prerequisitosNaGrade(estrutura, codigo);
+  const libera = dependentesNaGrade(estrutura, codigo).map((d) => [d.codigo]);
+  const painel = $('#detalhe');
+  painel.innerHTML = `
+    <div class="detalhe-topo">
+      <div>
+        <p class="detalhe-meta"><code class="chip-cod">${esc(codigo)}</code>
+          ${disc.periodo ? `${disc.periodo}º período · ` : ''}${esc(nomeGrade(estrutura))}</p>
+        <h2 id="detalheTitulo">${esc(bonito(disc.nome))}</h2>
+      </div>
+      <button type="button" class="detalhe-fechar" aria-label="Fechar detalhes">×</button>
+    </div>
+    <dl class="detalhe-numeros">
+      <div><dt>Créditos</dt><dd>${creditos}</dd></div>
+      <div><dt>Carga horária</dt><dd>${horasDe(creditos)} h</dd></div>
+      <div class="destaque"><dt>Limite de faltas</dt><dd>${limiteFaltas(creditos)}</dd></div>
+    </dl>
+    <p class="detalhe-nota">Máximo de faltas para não reprovar por frequência: a UFRN exige 75% de presença,
+      com aulas de 50 minutos. Atividades de orientação, como o TCC, podem seguir regras próprias.</p>
+    <section class="${sentido === 'requer' ? 'ativo-requer' : ''}">
+      <h3>Pré-requisitos</h3>
+      ${chipsDetalhe(requisitos, 'Nenhum. Pode ser cursada a qualquer momento.')}
+    </section>
+    <section class="${sentido === 'libera' ? 'ativo-libera' : ''}">
+      <h3>Libera</h3>
+      ${chipsDetalhe(libera, 'Nenhuma disciplina depende desta.')}
+    </section>
+    <section>
+      <h3>Ementa</h3>
+      ${ementa
+        ? `<p class="detalhe-ementa">${esc(ementa)}</p><p class="detalhe-fonte">Fonte: Projeto Pedagógico do Curso (PPC) do TADS.</p>`
+        : '<p class="detalhe-vazio">Ementa não disponível. Esta disciplina é da estrutura antiga e não consta no PPC atual.</p>'}
+    </section>`;
+  painel.hidden = false;
+  painel.scrollTop = 0;
+}
+
+function fecharDetalhe() {
+  const painel = $('#detalhe');
+  if (painel) painel.hidden = true;
+  mapaDoDetalhe = null;
+}
+
+function prepararDetalhe() {
+  const painel = $('#detalhe');
+  painel.addEventListener('click', (e) => {
+    if (e.target.closest('.detalhe-fechar')) {
+      if (mapaDoDetalhe) soltarMapa(mapaDoDetalhe); else fecharDetalhe();
+      return;
+    }
+    const ir = e.target.closest('[data-ir]');
+    const card = ir && mapaDoDetalhe?.querySelector(`.mapa-disc[data-cod="${ir.dataset.ir}"]`);
+    if (card) {
+      card.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      if (mapaDoDetalhe._fixo === ir.dataset.ir) return;
+      card.click();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !painel.hidden) {
+      if (mapaDoDetalhe) soltarMapa(mapaDoDetalhe); else fecharDetalhe();
+    }
   });
 }
 
@@ -1122,7 +1228,10 @@ function desenharLigacoes(palco, cadeia) {
     const x2 = r2.left - base.left + palco.scrollLeft;
     const y2 = r2.top + r2.height / 2 - base.top;
     const curva = Math.max((x2 - x1) * 0.5, 24);
-    const d = `M ${x1} ${y1} C ${x1 + curva} ${y1}, ${x2 - curva} ${y2}, ${x2} ${y2}`;
+    // na cadeia de pré-requisitos o caminho começa na direita, para o pulso correr para a esquerda
+    const d = cadeia.inverso
+      ? `M ${x2} ${y2} C ${x2 - curva} ${y2}, ${x1 + curva} ${y1}, ${x1} ${y1}`
+      : `M ${x1} ${y1} C ${x1 + curva} ${y1}, ${x2 - curva} ${y2}, ${x2} ${y2}`;
     const atraso = ((a.ordem ?? 0) * 0.45).toFixed(2);
     return `<path class="lig-base ${a.alt ? 'alt' : ''}" d="${d}"/><path class="lig-pulso" d="${d}" pathLength="100" style="animation-delay:${atraso}s"/>`;
   }).join('');
@@ -1139,6 +1248,11 @@ function nomeDe(codigo) {
   }
   return codigo;
 }
+// Carga horária e limite de faltas (UFRN: 1 crédito = 15 h; aulas de 50 min;
+// presença mínima de 75%). 60 h = 72 aulas, 25% = 18 faltas -> horas x 0,3.
+const horasDe = (creditos) => (Number(creditos) || 0) * 15;
+const limiteFaltas = (creditos) => Math.floor(horasDe(creditos) * 0.3);
+
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const somaCreditos = (dados) => dados.reduce((s, l) => s + (Number(l.creditos) || 0), 0);
 const gradeNaFrase = (e) => (e ? `na grade ${nomeGrade(e)}` : 'em todas as grades');

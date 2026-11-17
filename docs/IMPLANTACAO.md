@@ -29,6 +29,12 @@ Acesse http://localhost:3000.
    `[YOUR-PASSWORD]` pela senha do banco. Caracteres especiais da senha
    precisam ser codificados (`#` → `%23`, `@` → `%40`).
 
+### Atualizar um banco que já existe
+
+Quando uma versão nova trouxer um script em `sql/atualizacao_*.sql`, rode-o
+no **SQL Editor** do Supabase. Os scripts de atualização podem ser rodados
+mais de uma vez sem duplicar dados.
+
 ## Publicação na Vercel
 
 1. Importe o repositório do GitHub em **Add New → Project**.

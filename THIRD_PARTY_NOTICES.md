@@ -112,6 +112,7 @@ desde que os avisos de copyright e as licenças sejam preservados.
   do Norte (UFRN). Seu uso neste projeto não implica endosso, parceria ou
   vínculo oficial com a UFRN. Para uso comercial, é necessária autorização
   da instituição.
-- **Dados curriculares** (disciplinas, créditos, períodos e pré-requisitos):
-  baseados nas estruturas curriculares públicas do curso de Análise e
-  Desenvolvimento de Sistemas da UFRN.
+- **Dados curriculares** (disciplinas, créditos, períodos, pré-requisitos e
+  ementas): baseados nas estruturas curriculares públicas e no Projeto
+  Pedagógico do Curso (PPC) de Análise e Desenvolvimento de Sistemas da UFRN.
+  As ementas são reproduzidas do PPC para fins informativos.

@@ -40,7 +40,10 @@ app.get('/api/opcoes', async (req, res) => {
         codigo: l.codigo, nome: l.nome, creditos: l.creditos, periodo: l.periodo, prerequisitos: l.prerequisitos,
       }));
     }
-    res.json({ estruturas, componentes, detalhes });
+    // ementas: se a coluna ainda não existir no banco, a página funciona sem elas
+    let ementas = {};
+    try { ementas = consultas.ementas.normalizar(await executar(consultas.ementas.sql())); } catch { /* sem ementas */ }
+    res.json({ estruturas, componentes, detalhes, ementas });
   } catch (e) {
     res.status(503).json({ erro: 'Não foi possível acessar o banco de dados. Confira o arquivo .env.' });
   }

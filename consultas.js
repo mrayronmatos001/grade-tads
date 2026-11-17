@@ -55,6 +55,22 @@ ORDER BY e.codigo`,
     })),
   },
 
+  // Consulta interna: ementa de cada disciplina (texto do PPC)
+  ementas: {
+    interna: true,
+    titulo: 'Ementas',
+    campos: [],
+    colunas: [],
+    sql: () => ({
+      texto: `
+SELECT codigo, ementa
+FROM componente
+WHERE ementa IS NOT NULL`,
+      valores: [],
+    }),
+    normalizar: (linhas) => Object.fromEntries(linhas.map((l) => [l.codigo, l.ementa])),
+  },
+
   buscar: {
     titulo: "Buscar disciplinas",
     descricao: "Procura por parte do código ou do nome, em uma grade ou em todas.",

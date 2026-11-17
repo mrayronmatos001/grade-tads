@@ -15,8 +15,9 @@ de Sistemas da UFRN (estruturas 2015 e 2019).
 - **Perguntas em forma de frase:** "O que preciso ter cursado para fazer *Projetos Aplicados I* na grade *TADS 2019*?"
 - **Pré-requisitos:** cadeia completa até a base, com conexões animadas.
 - **O que libera:** fluxo das disciplinas que dependem da escolhida.
-- **Grade completa:** mapa por período; passar o mouse mostra o que a disciplina libera,
-  o primeiro clique fixa esse fluxo (azul) e o segundo mostra os pré-requisitos (verde).
+- **Grade completa:** mapa por período, com carga horária e limite de faltas em cada
+  disciplina; passar o mouse mostra o que ela libera, o primeiro clique fixa esse
+  fluxo (azul) e abre os detalhes com a ementa, e o segundo mostra os pré-requisitos (verde).
 - **O que posso cursar:** marcação das disciplinas concluídas ou importação do
   histórico do SIGAA em PDF, lido no próprio navegador.
 - **Cabeçalho com cargas horárias** obrigatórias, optativas e complementares.

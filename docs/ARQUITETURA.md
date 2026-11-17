@@ -36,7 +36,7 @@ o que protege contra injeção de SQL.
 |---|---|
 | `curso` | Curso (código, nome, sigla, instituição) |
 | `estrutura_curricular` | Cada grade (2015, 2019): ano, créditos optativos, horas complementares |
-| `componente` | Catálogo único de disciplinas (código, nome, créditos) |
+| `componente` | Catálogo único de disciplinas (código, nome, créditos, **ementa**) |
 | `componente_da_estrutura_curricular` | Quais disciplinas estão em cada grade, com natureza e **período** |
 | `grupo_de_prerequisito` | Exigências de uma disciplina numa grade |
 | `item_do_grupo_de_prerequisito` | Alternativas de cada exigência |
@@ -44,6 +44,16 @@ o que protege contra injeção de SQL.
 **Regra dos pré-requisitos:** grupos diferentes da mesma disciplina valem como
 **E**; itens dentro do mesmo grupo valem como **OU**. Exemplo: Arquitetura de
 Software exige *um* grupo com três itens (basta uma das três disciplinas).
+
+**Carga horária e faltas:** não ficam no banco, são calculadas a partir dos
+créditos. Na UFRN, 1 crédito equivale a 15 h, as aulas têm 50 minutos e a
+presença mínima é de 75%. Assim, o limite de faltas é `horas × 0,3`
+(arredondado para baixo): 30 h → 9, 45 h → 13, 60 h → 18, 90 h → 27.
+
+**Ementas:** vêm do Projeto Pedagógico do Curso (PPC) do TADS, estrutura
+2019, com as alterações aprovadas depois (curricularização da extensão e a
+nova ementa de Fundamentos da Computação). Disciplinas só da estrutura 2015
+que não constam no PPC ficam sem ementa.
 
 A coluna `periodo` foi acrescentada depois do diagrama acima, na tabela
 `componente_da_estrutura_curricular`, porque a mesma disciplina pode estar em
@@ -62,6 +72,7 @@ banco diretamente com o usuário do PostgreSQL.
 | `db.js` | Pool de conexões com o PostgreSQL |
 | `config.js` | Leitura das variáveis de ambiente (`.env`) |
 | `sql/banco_completo.sql` | Criação e carga completa do banco |
+| `sql/atualizacao_ementas.sql` | Atualização de um banco existente: ementas e correção de créditos |
 | `public/index.html`, `app.js`, `style.css` | A página |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |
 | `.github/workflows/manter-ativo.yml` | Acesso periódico que evita a pausa do Supabase gratuito |

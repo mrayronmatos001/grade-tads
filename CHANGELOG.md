@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 2.2.0
+- Grade completa: ao clicar numa disciplina, abre um painel com créditos,
+  carga horária, limite de faltas, pré-requisitos, o que ela libera e a
+  ementa (texto do PPC do TADS).
+- Cartões da grade mostram a carga horária e o limite de faltas.
+- Aba Pré-requisitos: o pulso verde sai da disciplina escolhida e corre da
+  direita para a esquerda, até a base da cadeia.
+- Banco: coluna `ementa` na tabela `componente` e correção de Legislação e
+  Ética em TI para 3 créditos (45 h), conforme o PPC e o SIGAA.
+- Correção: o mapa antigo não é mais redesenhado depois de trocar de grade.
+
 ## 2.1.0
 - Tema claro, escuro ou do sistema, com a escolha salva no navegador.
 - Grade completa: segundo clique mostra o fluxo inverso (verde) até os
