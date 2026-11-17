@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 2.3.0
+- Aba "Sugestões": formulário para enviar ideias ou avisar sobre erros nos
+  dados, com nome e e-mail opcionais. As mensagens ficam na tabela
+  `sugestao` do banco.
+- Proteções no envio: validação no servidor, campo-isca contra robôs e
+  limite de 5 envios a cada 10 minutos por endereço.
+- Política de Privacidade e Termos de Uso atualizados para as sugestões.
+
 ## 2.2.0
 - Grade completa: ao clicar numa disciplina, abre um painel com créditos,
   carga horária, limite de faltas, pré-requisitos, o que ela libera e a

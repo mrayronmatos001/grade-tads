@@ -24,6 +24,7 @@ Navegador (public/)  ──HTTP──▶  Servidor Express (server.js)  ──SQ
 | `/api/opcoes` | GET | Grades, disciplinas (com período e pré-requisitos) e cargas horárias |
 | `/api/consulta` | POST | Resposta de uma pergunta: `{ tipo, parametros }` → `{ dados }` |
 | `/api/status` | GET | `{ ok: true }` se o banco responde |
+| `/api/sugestoes` | POST | Grava uma sugestão: `{ tipo, mensagem, nome?, email? }` |
 
 Todas as consultas usam parâmetros (`$1`, `$2`…), nunca concatenação de texto,
 o que protege contra injeção de SQL.
@@ -40,6 +41,7 @@ o que protege contra injeção de SQL.
 | `componente_da_estrutura_curricular` | Quais disciplinas estão em cada grade, com natureza e **período** |
 | `grupo_de_prerequisito` | Exigências de uma disciplina numa grade |
 | `item_do_grupo_de_prerequisito` | Alternativas de cada exigência |
+| `sugestao` | Mensagens enviadas pela aba Sugestões (tipo, texto, nome e e-mail opcionais, status) |
 
 **Regra dos pré-requisitos:** grupos diferentes da mesma disciplina valem como
 **E**; itens dentro do mesmo grupo valem como **OU**. Exemplo: Arquitetura de
@@ -72,6 +74,7 @@ banco diretamente com o usuário do PostgreSQL.
 | `db.js` | Pool de conexões com o PostgreSQL |
 | `config.js` | Leitura das variáveis de ambiente (`.env`) |
 | `sql/banco_completo.sql` | Criação e carga completa do banco |
+| `sql/atualizacao_sugestoes.sql` | Atualização de um banco existente: tabela de sugestões |
 | `sql/atualizacao_ementas.sql` | Atualização de um banco existente: ementas e correção de créditos |
 | `public/index.html`, `app.js`, `style.css` | A página |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |

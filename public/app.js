@@ -85,7 +85,9 @@ async function iniciar() {
 
   $('#tipos').innerHTML = consultas.map((c) => `
     <button type="button" class="tipo" role="tab" data-tipo="${c.id}" title="${esc(c.descricao)}"
-      aria-selected="${c.id === tipoAtual}">${esc(ROTULOS_CURTOS[c.id] || c.titulo)}</button>`).join('');
+      aria-selected="${c.id === tipoAtual}">${esc(ROTULOS_CURTOS[c.id] || c.titulo)}</button>`).join('')
+    + `<button type="button" class="tipo tipo-sugestoes" role="tab" data-tipo="sugestoes" aria-selected="false"
+        title="Envie uma sugestão ou avise sobre um erro">Sugestões</button>`;
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
     if (!botao) return;
@@ -93,7 +95,8 @@ async function iniciar() {
     fecharDetalhe();
     tipoAtual = botao.dataset.tipo;
     document.querySelectorAll('.tipo').forEach((b) => b.setAttribute('aria-selected', b === botao));
-    montarFrase();
+    if (tipoAtual === 'sugestoes') mostrarSugestoes();
+    else montarFrase();
   });
 
   // a resposta atualiza sozinha a cada mudança na frase
@@ -111,6 +114,94 @@ async function iniciar() {
     else abrirEscolha(botao);
   });
   montarFrase();
+}
+
+// ---------------------------------------------------------------------
+// Aba "Sugestões": formulário enviado ao servidor e guardado no banco
+// ---------------------------------------------------------------------
+const TIPOS_SUGESTAO = [
+  ['SUGESTAO', 'Sugestão de melhoria'],
+  ['ERRO_DADOS', 'Erro nos dados da grade'],
+  ['OUTRO', 'Outro assunto'],
+];
+
+function mostrarSugestoes() {
+  $('#frase').textContent = 'Tem uma ideia ou encontrou um erro na grade? Conte pra gente.';
+  $('#extra').innerHTML = '';
+  $('#erroForm').textContent = '';
+  $('#resultado').innerHTML = `
+    <section class="resposta-visual sugestoes">
+      <form id="formSugestao" novalidate>
+        <fieldset class="sug-tipos">
+          <legend>Sobre o quê?</legend>
+          ${TIPOS_SUGESTAO.map(([valor, rotulo], i) => `
+            <label class="sug-tipo"><input type="radio" name="tipo" value="${valor}" ${i === 0 ? 'checked' : ''}><span>${rotulo}</span></label>`).join('')}
+        </fieldset>
+        <label class="sug-campo">
+          <span>Mensagem</span>
+          <textarea name="mensagem" rows="6" maxlength="2000" required
+            placeholder="Ex.: seria útil mostrar os horários das turmas; ou: o pré-requisito de Programação Web está diferente do SIGAA."></textarea>
+          <small class="sug-contador" id="contadorSugestao">0 / 2000</small>
+        </label>
+        <div class="sug-linha">
+          <label class="sug-campo"><span>Nome <em>(opcional)</em></span>
+            <input type="text" name="nome" maxlength="80" autocomplete="name"></label>
+          <label class="sug-campo"><span>E-mail <em>(opcional, se quiser resposta)</em></span>
+            <input type="email" name="email" maxlength="120" autocomplete="email"></label>
+        </div>
+        <input class="sug-isca" type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="sug-aviso">Não coloque CPF, matrícula ou outros dados pessoais na mensagem.
+          Saiba como tratamos o que você envia na <a href="privacidade.html">Política de Privacidade</a>.</p>
+        <div class="sug-acoes">
+          <button type="submit" class="sug-enviar">Enviar sugestão</button>
+          <p class="sug-status" id="statusSugestao" role="status"></p>
+        </div>
+      </form>
+    </section>`;
+  const form = $('#formSugestao');
+  const mensagem = form.elements.mensagem;
+  mensagem.addEventListener('input', () => {
+    $('#contadorSugestao').textContent = `${mensagem.value.length} / 2000`;
+  });
+  form.addEventListener('submit', enviarSugestao);
+}
+
+async function enviarSugestao(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const status = $('#statusSugestao');
+  const botao = form.querySelector('.sug-enviar');
+  const dados = Object.fromEntries(new FormData(form));
+  status.className = 'sug-status';
+  if ((dados.mensagem || '').trim().length < 10) {
+    status.classList.add('erro');
+    status.textContent = 'Escreva pelo menos 10 caracteres na mensagem.';
+    form.elements.mensagem.focus();
+    return;
+  }
+  botao.disabled = true;
+  botao.textContent = 'Enviando…';
+  try {
+    const r = await fetch('/api/sugestoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+    const corpo = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(corpo.erro || 'Não foi possível enviar agora.');
+    $('#resultado').innerHTML = `
+      <section class="resposta-visual sugestoes sug-obrigado">
+        <h2>Mensagem enviada. Obrigado!</h2>
+        <p>Vamos ler com atenção${dados.email ? ' e, se for o caso, responder no e-mail que você informou' : ''}.</p>
+        <button type="button" class="sug-enviar" id="novaSugestao">Enviar outra</button>
+      </section>`;
+    $('#novaSugestao').addEventListener('click', mostrarSugestoes);
+  } catch (erro) {
+    status.classList.add('erro');
+    status.textContent = erro.message;
+    botao.disabled = false;
+    botao.textContent = 'Enviar sugestão';
+  }
 }
 
 // ---------------------------------------------------------------------

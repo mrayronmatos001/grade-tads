@@ -35,6 +35,17 @@ Quando uma versão nova trouxer um script em `sql/atualizacao_*.sql`, rode-o
 no **SQL Editor** do Supabase. Os scripts de atualização podem ser rodados
 mais de uma vez sem duplicar dados.
 
+### Ler as sugestões
+
+No Supabase, abra **Table Editor → sugestao**. Use a coluna `status` para
+acompanhar cada mensagem: `NOVA`, `LIDA`, `RESOLVIDA` ou `DESCARTADA`.
+Pela Política de Privacidade, as sugestões devem ser apagadas em até 12
+meses. Para isso, rode no SQL Editor:
+
+```sql
+DELETE FROM sugestao WHERE criado_em < now() - interval '12 months';
+```
+
 ## Publicação na Vercel
 
 1. Importe o repositório do GitHub em **Add New → Project**.

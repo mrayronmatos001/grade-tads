@@ -9,7 +9,7 @@ const consultas = require('./consultas');
 const { executar, status } = require('./db');
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '20kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Lista de perguntas disponíveis (a tela monta a frase a partir daqui)
@@ -79,6 +79,55 @@ app.post('/api/consulta', async (req, res) => {
     res.json({ dados });
   } catch (e) {
     res.status(500).json({ erro: 'A consulta falhou no banco de dados.' });
+  }
+});
+
+// ---------------------------------------------------------------------
+// Sugestões enviadas pela aba "Sugestões"
+// ---------------------------------------------------------------------
+const TIPOS_SUGESTAO = ['SUGESTAO', 'ERRO_DADOS', 'OUTRO'];
+const envios = new Map();           // limite simples por IP (vale por instância do servidor)
+const LIMITE_ENVIOS = 5;
+const JANELA_MS = 10 * 60 * 1000;
+
+function podeEnviar(ip) {
+  const agora = Date.now();
+  const recentes = (envios.get(ip) || []).filter((t) => agora - t < JANELA_MS);
+  if (recentes.length >= LIMITE_ENVIOS) return false;
+  recentes.push(agora);
+  envios.set(ip, recentes);
+  return true;
+}
+
+app.post('/api/sugestoes', async (req, res) => {
+  const corpo = req.body || {};
+  // campo invisível na página: só robôs preenchem. Finge que deu certo e descarta.
+  if (corpo.site) return res.status(201).json({ ok: true });
+
+  const texto = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+  const tipo = TIPOS_SUGESTAO.includes(corpo.tipo) ? corpo.tipo : null;
+  const mensagem = texto(corpo.mensagem, 2000);
+  const nome = texto(corpo.nome, 80) || null;
+  const email = texto(corpo.email, 120) || null;
+
+  if (!tipo) return res.status(400).json({ erro: 'Escolha o tipo da mensagem.' });
+  if (mensagem.length < 10) return res.status(400).json({ erro: 'Escreva pelo menos 10 caracteres na mensagem.' });
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ erro: 'Confira o e-mail, ou deixe o campo em branco.' });
+  }
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  if (!podeEnviar(ip)) {
+    return res.status(429).json({ erro: 'Você enviou várias mensagens seguidas. Tente de novo em alguns minutos.' });
+  }
+
+  try {
+    await executar({
+      texto: 'INSERT INTO sugestao (tipo, mensagem, nome, email) VALUES ($1, $2, $3, $4)',
+      valores: [tipo, mensagem, nome, email],
+    });
+    res.status(201).json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ erro: 'Não foi possível enviar agora. Tente de novo em alguns minutos.' });
   }
 });
 
