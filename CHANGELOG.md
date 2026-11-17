@@ -1,5 +1,18 @@
 # Histórico de versões
 
+## 2.5.0
+- Layout de celular (até 720 px) refeito para toque e uma mão:
+  - cabeçalho compacto, com as cargas horárias numa linha deslizante e o
+    seletor de tema só com ícones;
+  - abas numa linha que desliza de lado;
+  - lista de opções e painel de detalhes como folhas que sobem de baixo;
+  - cadeias de pré-requisitos e de "O que libera" na vertical, com a
+    disciplina escolhida no topo e o pulso descendo;
+  - grade completa em blocos por período, com duas colunas de cartões e
+    fios que passam pelo corredor central, sem cruzar outros cartões;
+  - "O que posso cursar", resultados e área /admin em duas colunas ou
+    com botões maiores.
+
 ## 2.4.0
 - Área `/admin`, protegida por senha (variável `ADMIN_SENHA`), para ler as
   sugestões, filtrar por situação, marcar como lida, resolvida ou

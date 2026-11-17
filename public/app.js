@@ -95,6 +95,7 @@ async function iniciar() {
     fecharDetalhe();
     tipoAtual = botao.dataset.tipo;
     document.querySelectorAll('.tipo').forEach((b) => b.setAttribute('aria-selected', b === botao));
+    botao.scrollIntoView({ block: 'nearest', inline: 'center', behavior: semAnimacao() ? 'auto' : 'smooth' });
     if (tipoAtual === 'sugestoes') mostrarSugestoes();
     else montarFrase();
   });
@@ -381,7 +382,15 @@ function abrirEscolha(botao) {
     else if (e.key === 'Tab') { fecharEscolha(false); }
   });
 
-  // posição: logo abaixo da lacuna, sem sair da tela
+  // no celular: folha que sobe de baixo, sem abrir o teclado de cara
+  if (ehCelular()) {
+    painel.classList.add('folha');
+    botao.setAttribute('aria-expanded', 'true');
+    desenhar();
+    ul.focus();
+    return;
+  }
+  // no computador: logo abaixo da lacuna, sem sair da tela
   const r = botao.getBoundingClientRect();
   const largura = Math.min(Math.max(r.width, 340), window.innerWidth - 16);
   painel.style.width = `${largura}px`;
@@ -840,7 +849,7 @@ function desenharCadeia(ctx, dados) {
   </div></div>`);
 
   return `<p class="resumo">${resumo}</p>
-    <div class="cadeia"><div class="cadeia-palco" data-cadeia="${idCadeia}">
+    <div class="cadeia"><div class="cadeia-palco cadeia-requer" data-cadeia="${idCadeia}">
       <svg class="ligacoes" aria-hidden="true"></svg>
       ${diretos.length ? colunas.join('') : colunas[colunas.length - 1]}
     </div></div>
@@ -933,7 +942,15 @@ function desenharFios(mapa) {
     const linha = [...mapa.querySelectorAll('.mapa-periodo')].indexOf(el.closest('.mapa-periodo'));
     cartao[el.dataset.cod] = { ...rel(el.getBoundingClientRect()), linha };
   });
-  const vaoColuna = parseFloat(getComputedStyle(mapa.querySelector('.mapa-linha')).columnGap) || 24;
+  const estiloLinha = getComputedStyle(mapa.querySelector('.mapa-linha'));
+  const vaoColuna = parseFloat(estiloLinha.columnGap) || 24;
+  const vaoLinha = parseFloat(estiloLinha.rowGap) || 12;
+  // centro de cada período (no celular, os fios descem pelo corredor entre as duas colunas)
+  const centros = [...mapa.querySelectorAll('.mapa-linha')].map((el) => {
+    const r = el.getBoundingClientRect();
+    return (r.left + r.right) / 2 - base.left;
+  });
+  const celular = ehCelular();
   const corredor = (i) => (linhas[i].b + linhas[i + 1].t) / 2;   // espaço entre o período i e o seguinte
 
   // espalha os pontos de saída e de chegada em cada cartão
@@ -951,11 +968,20 @@ function desenharFios(mapa) {
     const desvio = ((n % 5) - 2) * 3;                    // evita fios exatamente sobrepostos
     const y1 = corredor(s.linha) + desvio;
     let pontos;
-    if (t.linha === s.linha + 1) {
+    if (celular) {
+      // celular: sai por baixo do cartão, anda pelo vão até o corredor central,
+      // desce por ele (sem passar por trás de outros cartões) e entra por cima do destino
+      const d2 = ((n % 5) - 2) * 2;
+      const corredorS = centros[s.linha] + d2;
+      const corredorT = centros[t.linha] + d2;
+      const yS = s.b + vaoLinha / 2;
+      const yT = t.t - vaoLinha / 2;
+      pontos = [[sx, s.b], [sx, yS], [corredorS, yS], [corredorS, y1], [corredorT, y1], [corredorT, yT], [tx, yT], [tx, t.t]];
+    } else if (t.linha === s.linha + 1) {
       pontos = [[sx, s.b], [sx, y1], [tx, y1], [tx, t.t]];
     } else {
       const y2 = corredor(t.linha - 1) + desvio;
-      const cx = t.l - vaoColuna / 2 + desvio;           // desce pelo vão à esquerda do cartão de destino
+      const cx = Math.max(t.l - vaoColuna / 2 + desvio, 3);   // desce pelo vão à esquerda do cartão de destino
       pontos = [[sx, s.b], [sx, y1], [cx, y1], [cx, y2], [tx, y2], [tx, t.t]];
     }
     a.d = caminhoArredondado(pontos);
@@ -1173,6 +1199,11 @@ function abrirDetalhe(mapa, codigo, sentido) {
     </section>`;
   painel.hidden = false;
   painel.scrollTop = 0;
+  document.body.classList.add('com-detalhe');
+  if (ehCelular()) {
+    const card = mapa.querySelector(`.mapa-disc[data-cod="${codigo}"]`);
+    card?.scrollIntoView({ block: 'start', behavior: semAnimacao() ? 'auto' : 'smooth' });
+  }
 }
 
 // A ementa do PPC é uma lista de tópicos separados por ";" ou por frases.
@@ -1193,6 +1224,7 @@ function htmlEmenta(texto) {
 function fecharDetalhe() {
   const painel = $('#detalhe');
   if (painel) painel.hidden = true;
+  document.body.classList.remove('com-detalhe');
   mapaDoDetalhe = null;
 }
 
@@ -1206,7 +1238,7 @@ function prepararDetalhe() {
     const ir = e.target.closest('[data-ir]');
     const card = ir && mapaDoDetalhe?.querySelector(`.mapa-disc[data-cod="${ir.dataset.ir}"]`);
     if (card) {
-      card.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      card.scrollIntoView({ block: ehCelular() ? 'start' : 'center', behavior: semAnimacao() ? 'auto' : 'smooth' });
       if (mapaDoDetalhe._fixo === ir.dataset.ir) return;
       card.click();
     }
@@ -1325,19 +1357,35 @@ function desenharLigacoes(palco, cadeia) {
   svg.setAttribute('viewBox', `0 0 ${largura} ${altura}`);
   const ponto = (id) => palco.querySelector(`[data-no="${id}"]`)?.getBoundingClientRect();
 
+  // no celular as colunas viram linhas empilhadas, e as ligações ficam verticais
+  const vertical = getComputedStyle(palco).flexDirection.startsWith('column');
   const caminhos = cadeia.arestas.map((a) => {
     const r1 = ponto(a.de);
     const r2 = ponto(a.para);
     if (!r1 || !r2) return '';
-    const x1 = r1.right - base.left + palco.scrollLeft;
-    const y1 = r1.top + r1.height / 2 - base.top;
-    const x2 = r2.left - base.left + palco.scrollLeft;
-    const y2 = r2.top + r2.height / 2 - base.top;
-    const curva = Math.max((x2 - x1) * 0.5, 24);
-    // na cadeia de pré-requisitos o caminho começa na direita, para o pulso correr para a esquerda
+    let x1, y1, x2, y2, c1, c2;
+    if (vertical) {
+      x1 = r1.left + r1.width / 2 - base.left;
+      x2 = r2.left + r2.width / 2 - base.left;
+      const deCima = r1.top < r2.top;
+      y1 = (deCima ? r1.bottom : r1.top) - base.top;
+      y2 = (deCima ? r2.top : r2.bottom) - base.top;
+      const k = (y2 - y1) / 2;
+      c1 = [x1, y1 + k];
+      c2 = [x2, y2 - k];
+    } else {
+      x1 = r1.right - base.left + palco.scrollLeft;
+      y1 = r1.top + r1.height / 2 - base.top;
+      x2 = r2.left - base.left + palco.scrollLeft;
+      y2 = r2.top + r2.height / 2 - base.top;
+      const curva = Math.max((x2 - x1) * 0.5, 24);
+      c1 = [x1 + curva, y1];
+      c2 = [x2 - curva, y2];
+    }
+    // na cadeia de pré-requisitos o caminho começa na disciplina escolhida, para o pulso sair dela
     const d = cadeia.inverso
-      ? `M ${x2} ${y2} C ${x2 - curva} ${y2}, ${x1 + curva} ${y1}, ${x1} ${y1}`
-      : `M ${x1} ${y1} C ${x1 + curva} ${y1}, ${x2 - curva} ${y2}, ${x2} ${y2}`;
+      ? `M ${x2} ${y2} C ${c2[0]} ${c2[1]}, ${c1[0]} ${c1[1]}, ${x1} ${y1}`
+      : `M ${x1} ${y1} C ${c1[0]} ${c1[1]}, ${c2[0]} ${c2[1]}, ${x2} ${y2}`;
     const atraso = ((a.ordem ?? 0) * 0.45).toFixed(2);
     return `<path class="lig-base ${a.alt ? 'alt' : ''}" d="${d}"/><path class="lig-pulso" d="${d}" pathLength="100" style="animation-delay:${atraso}s"/>`;
   }).join('');
@@ -1358,6 +1406,10 @@ function nomeDe(codigo) {
 // presença mínima de 75%). 60 h = 72 aulas, 25% = 18 faltas -> horas x 0,3.
 const horasDe = (creditos) => (Number(creditos) || 0) * 15;
 const limiteFaltas = (creditos) => Math.floor(horasDe(creditos) * 0.3);
+
+// celular: abaixo desta largura a página usa o layout de toque
+const ehCelular = () => matchMedia('(max-width: 720px)').matches;
+const semAnimacao = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 const somaCreditos = (dados) => dados.reduce((s, l) => s + (Number(l.creditos) || 0), 0);
