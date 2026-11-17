@@ -526,7 +526,7 @@ button.disc:hover { border-color: var(--menta); transform: translateY(-1px); }
   min-width: 100%;
   padding: 4px 2px 8px;
 }
-.ligacoes { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; z-index: 0; }
+.ligacoes { position: absolute; left: 0; top: 0; pointer-events: none; overflow: hidden; z-index: 0; }
 .lig-base {
   fill: none;
   stroke: color-mix(in srgb, var(--menta) 30%, transparent);
@@ -721,7 +721,7 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   min-width: calc(94px + var(--colunas) * 118px);
   padding: 6px 0 4px;
 }
-.mapa-fios { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 0; }
+.mapa-fios { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .mapa-periodo {
   display: grid;
   grid-template-columns: 70px 1fr;
@@ -808,7 +808,11 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--tom, var(--ciano)) 24%, transparent), 0 0 18px -4px var(--tom, var(--ciano));
 }
 .mapa.focando .mapa-disc.emissor { opacity: 1; }
-.mapa-disc.emissor { border-width: 2px; }
+/* borda mais grossa sem mudar o tamanho do cartão (senão a linha cresce,
+   os fios são redesenhados e o fluxo recomeça sem parar) */
+.mapa-disc.emissor {
+  box-shadow: inset 0 0 0 1px var(--tom, var(--ciano)), 0 0 0 3px color-mix(in srgb, var(--tom, var(--ciano)) 24%, transparent), 0 0 18px -4px var(--tom, var(--ciano));
+}
 .mapa-disc.emissor .chip-cod { color: #fff; background: var(--tom); }
 
 @media (prefers-reduced-motion: reduce) {

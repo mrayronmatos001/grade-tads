@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 2.7.2
+- Correção: no desktop, clicar em Algoritmos e Programação (ou em outra
+  disciplina que libera várias) fazia o fluxo recomeçar sem parar. O cartão
+  "emissor" ganhava borda de 2 px, a linha crescia 4 px, os fios eram
+  redesenhados e o fluxo reiniciava. A borda agora é desenhada por dentro,
+  sem mudar o tamanho do cartão.
+- Os SVGs dos fios recortam o próprio conteúdo, para o brilho não aumentar
+  a área de rolagem.
+
 ## 2.7.1
 - Correção: ao girar o celular e voltar para a vertical, a grade completa
   ficava miniaturizada (a página ficava mais larga que a tela e o navegador
