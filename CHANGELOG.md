@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## 2.7.1
+- Correção: ao girar o celular e voltar para a vertical, a grade completa
+  ficava miniaturizada (a página ficava mais larga que a tela e o navegador
+  reduzia o zoom). O SVG dos fios agora é medido sem o tamanho antigo.
+- Correção: no desktop, depois de vir de uma tela estreita, o mapa da grade
+  ganhava uma barra de rolagem vertical sem necessidade (mesma causa).
+- Os e-mails de contato (mrayronmatos01@gmail.com e heitorf777@gmail.com)
+  ficam escritos nos Termos e na Política de Privacidade; a variável
+  `CONTATO_EMAIL`, se definida, os substitui.
+
 ## 2.7.0
 - Desempenho: o brilho dos fios animados deixou de usar `filter: drop-shadow`
   e passou a ser um halo (traço largo e translúcido por baixo). Num celular

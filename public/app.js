@@ -944,14 +944,26 @@ function desenharFios(mapa) {
   if (!mapa.isConnected) { mapa._observador?.disconnect(); return; }
   const dadosMapa = mapasNaTela[Number(mapa.dataset.mapa)];
   if (!dadosMapa) return;
-  // só redesenha quando o tamanho muda de verdade
-  const chave = `${mapa.clientWidth}x${mapa.scrollHeight}`;
-  if (mapa._chave === chave) return;
-  mapa._chave = chave;
+  // mede o mapa sem o SVG: com o tamanho antigo, ele mesmo segurava o mapa
+  // largo depois de girar a tela ou encolher a janela
   const svg = mapa.querySelector('.mapa-fios');
+  const larguraAntes = svg.getAttribute('width');
+  const alturaAntes = svg.getAttribute('height');
+  svg.setAttribute('width', 0);
+  svg.setAttribute('height', 0);
+  const largura = mapa.scrollWidth;
+  const altura = mapa.scrollHeight;
+  // só redesenha quando o tamanho muda de verdade
+  const chave = `${mapa.clientWidth}x${largura}x${altura}`;
+  if (mapa._chave === chave) {
+    svg.setAttribute('width', larguraAntes);
+    svg.setAttribute('height', alturaAntes);
+    return;
+  }
+  mapa._chave = chave;
   const base = mapa.getBoundingClientRect();
-  svg.setAttribute('width', mapa.scrollWidth);
-  svg.setAttribute('height', mapa.scrollHeight);
+  svg.setAttribute('width', largura);
+  svg.setAttribute('height', altura);
   const rel = (r) => ({ l: r.left - base.left, r: r.right - base.left, t: r.top - base.top, b: r.bottom - base.top, w: r.width });
   const linhas = [...mapa.querySelectorAll('.mapa-periodo')].map((el) => rel(el.getBoundingClientRect()));
   const cartao = {};
@@ -1387,6 +1399,9 @@ function desenharLigacoes(palco, cadeia) {
   const svg = palco.querySelector('.ligacoes');
   if (!svg) return;
   const base = palco.getBoundingClientRect();
+  // mede sem o SVG, para o tamanho antigo não segurar o palco largo
+  svg.setAttribute('width', 0);
+  svg.setAttribute('height', 0);
   const largura = palco.scrollWidth;
   const altura = palco.scrollHeight;
   svg.setAttribute('width', largura);

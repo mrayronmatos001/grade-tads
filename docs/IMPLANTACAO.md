@@ -9,7 +9,7 @@
 | `PG_SSL` | `true` para exigir SSL (padrão `true` com `DATABASE_URL`) |
 | `PORT` | Porta local do servidor (padrão 3000) |
 | `ADMIN_SENHA` | Senha da área `/admin`. Sem ela, a área fica desativada |
-| `CONTATO_EMAIL` | E-mails de contato dos Termos e da Política de Privacidade, separados por vírgula |
+| `CONTATO_EMAIL` | Opcional. Substitui os e-mails de contato escritos nos Termos e na Política de Privacidade (separados por vírgula) |
 
 Localmente, copie `.env.example` para `.env`. O `.env` nunca deve ir para o
 repositório (já está no `.gitignore`).
