@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.6.0">
+  <link rel="stylesheet" href="style.css?v=2.7.0">
   <script>
     try {
       const tema = localStorage.getItem('tema');
@@ -56,8 +56,24 @@
       <p>Estes termos podem ser atualizados; a data no topo indica a versão vigente. Aplicam-se as leis brasileiras, com foro na Comarca de Natal/RN.</p>
 
       <h2>9. Contato</h2>
-      <p>Dúvidas: <strong>[e-mail de contato dos titulares]</strong>.</p>
+      <p>Dúvidas: <strong data-contato>o e-mail informado pelos titulares</strong>.</p>
     </article>
   </main>
+  <script>
+    // preenche os e-mails de contato com o que estiver configurado no servidor
+    fetch('/api/contato').then((r) => r.json()).then(({ emails }) => {
+      if (!emails || !emails.length) return;
+      document.querySelectorAll('[data-contato]').forEach((alvo) => {
+        alvo.textContent = '';
+        emails.forEach((email, i) => {
+          if (i) alvo.append(i === emails.length - 1 ? ' ou ' : ', ');
+          const a = document.createElement('a');
+          a.href = `mailto:${email}`;
+          a.textContent = email;
+          alvo.append(a);
+        });
+      });
+    }).catch(() => {});
+  </script>
 </body>
 </html>

@@ -1075,13 +1075,17 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false, sentido = 'libera')
     });
     arestas.forEach((a) => {
       const tom = tomPara(origem(a));
-      const carga = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      carga.setAttribute('d', caminho(a));
-      carga.setAttribute('pathLength', '100');
-      carga.setAttribute('class', `fio-carga ${a.alt ? 'alt' : ''}`);
-      carga.style.setProperty('--tom', tom);
-      carga.style.animationDelay = `${atraso}ms`;
-      ativos.appendChild(carga);
+      // o brilho é um halo (traço largo e translúcido) por baixo do fio:
+      // bem mais leve que filter: drop-shadow, que travava a animação no celular
+      ['fio-carga halo', 'fio-carga'].forEach((classe) => {
+        const carga = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        carga.setAttribute('d', caminho(a));
+        carga.setAttribute('pathLength', '100');
+        carga.setAttribute('class', `${classe} ${a.alt ? 'alt' : ''}`);
+        carga.style.setProperty('--tom', tom);
+        carga.style.animationDelay = `${atraso}ms`;
+        ativos.appendChild(carga);
+      });
       mapa._timers.push(setTimeout(() => {
         const alvo = cartaoDe(destino(a));
         if (alvo) {
@@ -1089,12 +1093,14 @@ function ativarFluxo(mapa, codigo, cascata, refazer = false, sentido = 'libera')
           alvo.classList.add('alcancado');
         }
         if (reduzir) return;
-        const pulso = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        pulso.setAttribute('d', caminho(a));
-        pulso.setAttribute('pathLength', '100');
-        pulso.setAttribute('class', 'fio-pulso');
-        pulso.style.setProperty('--tom', tom);
-        ativos.appendChild(pulso);
+        ['fio-pulso halo', 'fio-pulso'].forEach((classe) => {
+          const pulso = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          pulso.setAttribute('d', caminho(a));
+          pulso.setAttribute('pathLength', '100');
+          pulso.setAttribute('class', classe);
+          pulso.style.setProperty('--tom', tom);
+          ativos.appendChild(pulso);
+        });
       }, atraso + DUR));
     });
     if (!cascata) break;
@@ -1418,7 +1424,9 @@ function desenharLigacoes(palco, cadeia) {
       ? `M ${x2} ${y2} C ${c2[0]} ${c2[1]}, ${c1[0]} ${c1[1]}, ${x1} ${y1}`
       : `M ${x1} ${y1} C ${c1[0]} ${c1[1]}, ${c2[0]} ${c2[1]}, ${x2} ${y2}`;
     const atraso = ((a.ordem ?? 0) * 0.45).toFixed(2);
-    return `<path class="lig-base ${a.alt ? 'alt' : ''}" d="${d}"/><path class="lig-pulso" d="${d}" pathLength="100" style="animation-delay:${atraso}s"/>`;
+    return `<path class="lig-base ${a.alt ? 'alt' : ''}" d="${d}"/>`
+      + `<path class="lig-pulso halo" d="${d}" pathLength="100" style="animation-delay:${atraso}s"/>`
+      + `<path class="lig-pulso" d="${d}" pathLength="100" style="animation-delay:${atraso}s"/>`;
   }).join('');
   svg.innerHTML = caminhos;
 }

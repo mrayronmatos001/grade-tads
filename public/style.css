@@ -539,7 +539,6 @@ button.disc:hover { border-color: var(--menta); transform: translateY(-1px); }
   stroke-linecap: round;
   stroke-dasharray: 14 86;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 4px var(--menta)) drop-shadow(0 0 10px color-mix(in srgb, var(--menta) 60%, transparent));
   animation: pulso 2.6s linear infinite;
 }
 @keyframes pulso { to { stroke-dashoffset: 0; } }
@@ -661,7 +660,6 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 .fluxo-azul .lig-base { stroke: color-mix(in srgb, var(--ciano) 32%, transparent); }
 .fluxo-azul .lig-pulso {
   stroke: var(--ciano);
-  filter: drop-shadow(0 0 4px var(--ciano)) drop-shadow(0 0 10px color-mix(in srgb, var(--ciano) 60%, transparent));
 }
 .lig-base.alt { stroke-dasharray: 5 6; }
 .no-fonte {
@@ -779,7 +777,6 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   stroke-linecap: round;
   stroke-dasharray: 100 100;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--tom, var(--ciano)) 70%, transparent));
   animation: carregar 650ms ease-out forwards;
 }
 @keyframes carregar { to { stroke-dashoffset: 0; } }
@@ -791,7 +788,6 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   stroke-linecap: round;
   stroke-dasharray: 9 91;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 5px var(--tom, var(--ciano))) drop-shadow(0 0 12px color-mix(in srgb, var(--tom, var(--ciano)) 60%, transparent));
   animation: pulso 1.5s linear infinite;
 }
 
@@ -1424,3 +1420,10 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   .detalhe.recolhido .detalhe-topo { align-items: center; }
   body.com-detalhe { padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
 }
+
+/* brilho dos fios: halo largo e translúcido por baixo do traço
+   (substitui filter: drop-shadow, que derrubava a animação no celular) */
+.lig-pulso.halo { stroke-width: 9; stroke-opacity: 0.22; }
+.fio-carga.halo { stroke-width: 9; stroke-opacity: 0.22; }
+.fio-pulso.halo { stroke-width: 11; stroke-opacity: 0.3; }
+.fio-carga.halo.alt { stroke-dasharray: 100 100; }

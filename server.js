@@ -132,6 +132,9 @@ app.post('/api/sugestoes', async (req, res) => {
   }
 });
 
+// E-mails de contato das páginas legais (vêm da variável CONTATO_EMAIL)
+app.get('/api/contato', (req, res) => res.json({ emails: config.contatoEmails }));
+
 // Área administrativa (a página fica em public/admin/; os dados, aqui)
 app.use('/api/admin', admin);
 

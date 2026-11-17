@@ -9,6 +9,7 @@
 | `PG_SSL` | `true` para exigir SSL (padrão `true` com `DATABASE_URL`) |
 | `PORT` | Porta local do servidor (padrão 3000) |
 | `ADMIN_SENHA` | Senha da área `/admin`. Sem ela, a área fica desativada |
+| `CONTATO_EMAIL` | E-mails de contato dos Termos e da Política de Privacidade, separados por vírgula |
 
 Localmente, copie `.env.example` para `.env`. O `.env` nunca deve ir para o
 repositório (já está no `.gitignore`).
@@ -75,7 +76,7 @@ O plano gratuito pausa projetos após 7 dias sem acesso ao banco. O workflow
 - [ ] Plano de hospedagem compatível com uso comercial: o plano Hobby da Vercel é
       destinado a uso pessoal e não comercial; para fins comerciais, use o plano Pro.
 - [ ] Autorização da UFRN para uso do logotipo do TADS/UFRN, ou substituição por uma marca própria.
-- [ ] Contato do titular preenchido nos Termos de Uso e na Política de Privacidade.
+- [ ] Variável `CONTATO_EMAIL` configurada (e-mails exibidos nos Termos de Uso e na Política de Privacidade).
 - [ ] Revisão dos documentos legais por um profissional de direito.
 
 ## Versão nos arquivos da página

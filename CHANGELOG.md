@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 2.7.0
+- Desempenho: o brilho dos fios animados deixou de usar `filter: drop-shadow`
+  e passou a ser um halo (traço largo e translúcido por baixo). Num celular
+  simulado, o fluxo de Algoritmos e Programação subiu de 12 a 20 para 60
+  quadros por segundo, sem travadas.
+- Os e-mails de contato dos Termos de Uso e da Política de Privacidade
+  passaram a vir da variável `CONTATO_EMAIL`, para não serem apagados em
+  atualizações dos arquivos da página.
+
 ## 2.6.0
 - Celular: as abas viraram uma barra de navegação fixa no rodapé, com ícone
   e nome curto (Buscar, Requisitos, Libera, Grade, Cursar, Sugestões),

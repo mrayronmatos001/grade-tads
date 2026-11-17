@@ -15,6 +15,11 @@ const ligado = (v) => ['1', 'true', 'sim', 'yes'].includes(String(v || '').toLow
 module.exports = {
   porta: Number(process.env.PORT || 3000),
 
+  // e-mails de contato mostrados nos Termos e na Política de Privacidade
+  // (vários separados por vírgula); ficam fora do HTML para não serem perdidos em atualizações
+  contatoEmails: (process.env.CONTATO_EMAIL || '')
+    .split(',').map((e) => e.trim()).filter((e) => /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(e)),
+
   // senha da área /admin; sem ela, a área fica desativada
   adminSenha: process.env.ADMIN_SENHA || '',
 
