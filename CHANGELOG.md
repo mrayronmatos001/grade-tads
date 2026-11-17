@@ -3,7 +3,7 @@
 ## 2.2.0
 - Grade completa: ao clicar numa disciplina, abre um painel com créditos,
   carga horária, limite de faltas, pré-requisitos, o que ela libera e a
-  ementa (texto do PPC do TADS).
+  ementa (texto do PPC do TADS), exibida em badges, um por tópico.
 - Cartões da grade mostram a carga horária e o limite de faltas.
 - Aba Pré-requisitos: o pulso verde sai da disciplina escolhida e corre da
   direita para a esquerda, até a base da cadeia.

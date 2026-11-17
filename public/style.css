@@ -1054,3 +1054,20 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   @keyframes subir-detalhe { from { opacity: 0; transform: translateY(24px); } }
 }
 @media (prefers-reduced-motion: reduce) { .detalhe { animation: none; } }
+
+/* ementa em badges, um por tópico */
+.detalhe-contagem { font-size: 0.75rem; font-weight: 600; color: var(--tinta-suave); margin: -4px 0 8px; }
+.detalhe-topicos {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.detalhe-topicos li {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--tinta);
+  background: color-mix(in srgb, var(--menta) 13%, var(--folha));
+  border: 1px solid color-mix(in srgb, var(--menta) 35%, transparent);
+  border-radius: 10px;
+  padding: 5px 10px;
+}

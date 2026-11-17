@@ -1077,11 +1077,26 @@ function abrirDetalhe(mapa, codigo, sentido) {
     <section>
       <h3>Ementa</h3>
       ${ementa
-        ? `<p class="detalhe-ementa">${esc(ementa)}</p><p class="detalhe-fonte">Fonte: Projeto Pedagógico do Curso (PPC) do TADS.</p>`
+        ? `${htmlEmenta(ementa)}<p class="detalhe-fonte">Fonte: Projeto Pedagógico do Curso (PPC) do TADS.</p>`
         : '<p class="detalhe-vazio">Ementa não disponível. Esta disciplina é da estrutura antiga e não consta no PPC atual.</p>'}
     </section>`;
   painel.hidden = false;
   painel.scrollTop = 0;
+}
+
+// A ementa do PPC é uma lista de tópicos separados por ";" ou por frases.
+// Cada tópico vira um badge.
+function topicosDaEmenta(texto) {
+  return texto
+    .split(/;\s*/)
+    .flatMap((parte) => parte.split(/\.\s+(?=[A-ZÀ-Ü0-9])/))
+    .map((t) => t.trim().replace(/[.;:\s]+$/, ''))
+    .filter(Boolean);
+}
+function htmlEmenta(texto) {
+  const topicos = topicosDaEmenta(texto);
+  return `<p class="detalhe-contagem">${plural(topicos.length, 'tópico', 'tópicos')}</p>
+    <ul class="detalhe-topicos">${topicos.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
 }
 
 function fecharDetalhe() {
