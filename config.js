@@ -15,6 +15,9 @@ const ligado = (v) => ['1', 'true', 'sim', 'yes'].includes(String(v || '').toLow
 module.exports = {
   porta: Number(process.env.PORT || 3000),
 
+  // senha da área /admin; sem ela, a área fica desativada
+  adminSenha: process.env.ADMIN_SENHA || '',
+
   postgres: process.env.DATABASE_URL
     ? {
         // formato do Supabase: postgresql://usuario:senha@host:porta/banco

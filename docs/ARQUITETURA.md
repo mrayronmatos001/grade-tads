@@ -25,6 +25,16 @@ Navegador (public/)  ──HTTP──▶  Servidor Express (server.js)  ──SQ
 | `/api/consulta` | POST | Resposta de uma pergunta: `{ tipo, parametros }` → `{ dados }` |
 | `/api/status` | GET | `{ ok: true }` se o banco responde |
 | `/api/sugestoes` | POST | Grava uma sugestão: `{ tipo, mensagem, nome?, email? }` |
+| `/api/admin/sessao` | GET | Diz se a área admin está ativa e se há sessão |
+| `/api/admin/login` | POST | Entra com `{ senha }` e recebe o cookie de sessão |
+| `/api/admin/logout` | POST | Encerra a sessão |
+| `/api/admin/sugestoes` | GET | Lista as sugestões (filtro `?status=`) e a contagem por situação |
+| `/api/admin/sugestoes/:id` | PATCH / DELETE | Muda a situação `{ status }` ou apaga |
+| `/api/admin/limpeza` | POST | Apaga as sugestões com mais de 12 meses |
+
+As rotas `/api/admin/*` (exceto sessão e login) exigem um cookie de sessão
+assinado com HMAC a partir da `ADMIN_SENHA`. Trocar a senha encerra todas as
+sessões. O cookie é HttpOnly e SameSite=Strict e vale 8 horas.
 
 Todas as consultas usam parâmetros (`$1`, `$2`…), nunca concatenação de texto,
 o que protege contra injeção de SQL.
@@ -72,6 +82,8 @@ banco diretamente com o usuário do PostgreSQL.
 | `server.js` | Rotas da API e entrega da página |
 | `consultas.js` | Consultas SQL e formatação das respostas |
 | `db.js` | Pool de conexões com o PostgreSQL |
+| `admin.js` | Login e rotas da área `/admin` |
+| `public/admin/` | Página da área administrativa |
 | `config.js` | Leitura das variáveis de ambiente (`.env`) |
 | `sql/banco_completo.sql` | Criação e carga completa do banco |
 | `sql/atualizacao_sugestoes.sql` | Atualização de um banco existente: tabela de sugestões |

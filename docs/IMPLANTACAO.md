@@ -8,6 +8,7 @@
 | `PG_HOST`, `PG_PORT`, `PG_USER`, `PG_PASSWORD`, `PG_DATABASE` | Alternativa para um PostgreSQL local |
 | `PG_SSL` | `true` para exigir SSL (padrão `true` com `DATABASE_URL`) |
 | `PORT` | Porta local do servidor (padrão 3000) |
+| `ADMIN_SENHA` | Senha da área `/admin`. Sem ela, a área fica desativada |
 
 Localmente, copie `.env.example` para `.env`. O `.env` nunca deve ir para o
 repositório (já está no `.gitignore`).
@@ -37,7 +38,11 @@ mais de uma vez sem duplicar dados.
 
 ### Ler as sugestões
 
-No Supabase, abra **Table Editor → sugestao**. Use a coluna `status` para
+Pelo site, em **`/admin`**, com a senha definida em `ADMIN_SENHA`. Na Vercel,
+crie a variável em **Settings → Environment Variables** e faça um novo deploy
+(**Deployments → ⋯ → Redeploy**) para ela passar a valer.
+
+Também dá para ler direto no Supabase, em **Table Editor → sugestao**. Use a coluna `status` para
 acompanhar cada mensagem: `NOVA`, `LIDA`, `RESOLVIDA` ou `DESCARTADA`.
 Pela Política de Privacidade, as sugestões devem ser apagadas em até 12
 meses. Para isso, rode no SQL Editor:
@@ -72,3 +77,10 @@ O plano gratuito pausa projetos após 7 dias sem acesso ao banco. O workflow
 - [ ] Autorização da UFRN para uso do logotipo do TADS/UFRN, ou substituição por uma marca própria.
 - [ ] Contato do titular preenchido nos Termos de Uso e na Política de Privacidade.
 - [ ] Revisão dos documentos legais por um profissional de direito.
+
+## Versão nos arquivos da página
+
+O `index.html`, o `termos.html` e o `privacidade.html` carregam
+`style.css?v=X.Y.Z` e `app.js?v=X.Y.Z`. Ao lançar uma versão nova, atualize
+esse número junto com o `package.json`: assim os navegadores baixam os
+arquivos novos em vez de usar uma cópia antiga guardada em cache.

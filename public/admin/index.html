@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin - Grade TADS</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=2.4.0">
+  <script>
+    try {
+      const tema = localStorage.getItem('tema');
+      if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+    } catch {}
+  </script>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <header class="topo">
+    <a class="marca" href="/">
+      <img src="/img/logo-tads.png" alt="Logotipo do curso TADS da UFRN" width="64" height="64">
+      <span class="marca-texto">
+        <strong>Sugestões recebidas</strong>
+        <span>Área administrativa da Grade TADS</span>
+      </span>
+    </a>
+    <button type="button" class="adm-sair" id="sair" hidden>Sair</button>
+  </header>
+
+  <main class="pagina">
+    <section class="adm-entrar" id="entrar" hidden>
+      <form id="formEntrar" class="resposta-visual">
+        <h1>Entrar</h1>
+        <p id="avisoEntrar">Digite a senha da área administrativa.</p>
+        <label class="sug-campo"><span>Senha</span>
+          <input type="password" name="senha" autocomplete="current-password" required></label>
+        <div class="sug-acoes">
+          <button type="submit" class="sug-enviar">Entrar</button>
+          <p class="sug-status erro" id="erroEntrar" role="alert"></p>
+        </div>
+      </form>
+    </section>
+
+    <section id="painelAdmin" hidden>
+      <div class="adm-barra">
+        <div class="tipos" id="filtros" role="tablist" aria-label="Filtrar por situação"></div>
+        <button type="button" class="link" id="limpeza" title="Apaga as sugestões com mais de 12 meses, como diz a Política de Privacidade">Apagar com mais de 12 meses</button>
+      </div>
+      <p class="sug-status" id="statusAdmin" role="status"></p>
+      <div id="lista" class="adm-lista" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script src="/admin/admin.js?v=2.4.0"></script>
+</body>
+</html>

@@ -21,7 +21,8 @@ de Sistemas da UFRN (estruturas 2015 e 2019).
 - **O que posso cursar:** marcação das disciplinas concluídas ou importação do
   histórico do SIGAA em PDF, lido no próprio navegador.
 - **Cabeçalho com cargas horárias** obrigatórias, optativas e complementares.
-- **Sugestões:** formulário para enviar ideias ou avisar sobre erros, guardado no banco.
+- **Sugestões:** formulário para enviar ideias ou avisar sobre erros, guardado no banco,
+  com a área **`/admin`** (protegida por senha) para ler e organizar as mensagens.
 - **Tema claro, escuro ou do sistema.**
 
 ## Tecnologias

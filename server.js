@@ -7,6 +7,7 @@ const path = require('path');
 const config = require('./config');
 const consultas = require('./consultas');
 const { executar, status } = require('./db');
+const admin = require('./admin');
 
 const app = express();
 app.use(express.json({ limit: '20kb' }));
@@ -130,6 +131,9 @@ app.post('/api/sugestoes', async (req, res) => {
     res.status(500).json({ erro: 'Não foi possível enviar agora. Tente de novo em alguns minutos.' });
   }
 });
+
+// Área administrativa (a página fica em public/admin/; os dados, aqui)
+app.use('/api/admin', admin);
 
 // Localmente, sobe o servidor; na Vercel, o app é exportado e vira uma função
 if (require.main === module) {

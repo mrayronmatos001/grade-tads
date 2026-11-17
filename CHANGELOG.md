@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 2.4.0
+- Área `/admin`, protegida por senha (variável `ADMIN_SENHA`), para ler as
+  sugestões, filtrar por situação, marcar como lida, resolvida ou
+  descartada, apagar e remover as que têm mais de 12 meses.
+- Sessão em cookie assinado (HttpOnly, SameSite=Strict, 8 horas) e limite
+  de 5 tentativas de senha a cada 15 minutos.
+- Arquivos da página carregados com a versão no endereço, para o navegador
+  não usar uma cópia antiga.
+
 ## 2.3.0
 - Aba "Sugestões": formulário para enviar ideias ou avisar sobre erros nos
   dados, com nome e e-mail opcionais. As mensagens ficam na tabela
