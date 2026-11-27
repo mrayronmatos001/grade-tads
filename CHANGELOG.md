@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 2.8.1
+- Aba "Complementares" mais limpa: cada tipo de atividade virou um cartão que
+  abre e fecha; atividades que só mudam pelo âmbito (local, nacional,
+  internacional) ou pelo Qualis ficaram numa linha só, com os valores lado a
+  lado (44 linhas viraram 33); textos mais curtos.
+- A busca abre sozinha os cartões com resultado e, ao limpar, volta como estava.
+- Clicar em "180 h complementares" no cabeçalho abre a aba.
+
 ## 2.8.0
 - Nova aba "Complementares" (no celular, "Horas"): tabela das atividades que
   contam como horas complementares, separadas por tipo (Arts. 5º a 9º da

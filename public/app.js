@@ -107,6 +107,13 @@ async function iniciar() {
   $('#tipos').innerHTML = consultas.map((c) => htmlAba(c.id, c.descricao, c.id === tipoAtual)).join('')
     + htmlAba('complementares', 'Atividades que contam como horas complementares', false)
     + htmlAba('sugestoes', 'Envie uma sugestão ou avise sobre um erro', false, 'tipo-sugestoes');
+  $('#cargas').addEventListener('click', (e) => {
+    const link = e.target.closest('[data-ir]');
+    if (!link) return;
+    e.preventDefault();   // o contador fica dentro do link do logotipo
+    irParaAba(link.dataset.ir);
+    if (!ehCelular()) $('#formulario').scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+  });
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
     if (!botao) return;
@@ -141,79 +148,83 @@ async function iniciar() {
 // ---------------------------------------------------------------------
 // Aba "Horas complementares": tabela da resolução do curso, com busca
 // ---------------------------------------------------------------------
+const UNIDADE_COMP = { mes: '/mês', item: '' };
 function valorAtividade(item) {
-  switch (item.por) {
-    case 'mes': return [`${item.chi} h`, 'por mês'];
-    case 'total': return ['Carga total', 'do curso feito'];
-    case 'dobro': return ['2× a carga', 'do minicurso'];
-    case 'metade': return ['½ da carga', 'do evento'];
-    default: return [`${item.chi} h`, 'por atividade'];
-  }
+  if (item.por === 'total') return 'carga do curso';
+  if (item.por === 'dobro') return '2× a carga';
+  if (item.por === 'metade') return '½ da carga';
+  return `${item.chi} h${UNIDADE_COMP[item.por]}`;
+}
+
+function htmlAtividade(item, grupo) {
+  const busca = semAcento(`${grupo.titulo} ${item.d} ${(item.niveis || []).map((n) => n[0]).join(' ')}`);
+  const niveis = item.niveis
+    ? `<span class="comp-niveis">${item.niveis.map(([rotulo, h]) => `<span>${esc(rotulo)} <b>${h} h</b></span>`).join('')}</span>`
+    : '';
+  return `<li class="comp-item" data-busca="${esc(busca)}">
+    <span class="comp-desc">${esc(item.d)}${niveis}</span>
+    <span class="comp-lado">
+      ${item.niveis ? '' : `<b class="comp-valor">${valorAtividade(item)}</b>`}
+      <span class="comp-teto">máx. ${item.teto} h</span>
+    </span>
+  </li>`;
 }
 
 function mostrarComplementares() {
   const grupos = window.ATIVIDADES_COMPLEMENTARES || [];
   const det = (opcoes.detalhes || {})[[...(opcoes.estruturas || [])].sort().reverse()[0]];
-  $('#frase').textContent = 'Quais atividades contam como horas complementares, e quanto cada uma vale?';
+  $('#frase').textContent = 'O que conta como hora complementar?';
   $('#erroForm').textContent = '';
   $('#extra').innerHTML = `
     <label class="comp-busca">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
-      <input type="search" id="buscaComp" placeholder="Procure uma atividade (ex.: monitoria, hackathon, estágio)" autocomplete="off" aria-label="Procurar atividade">
+      <input type="search" id="buscaComp" placeholder="Procure: monitoria, estágio, hackathon…" autocomplete="off" aria-label="Procurar atividade">
     </label>`;
   $('#resultado').innerHTML = `
-    <section class="resposta-visual complementares">
-      <div class="comp-intro">
-        ${det ? `<p class="comp-meta"><b>${det.horas_complementares} h</b> de atividades complementares na grade ${esc(nomeGrade(det.codigo))}</p>` : ''}
-        <p>Cada atividade vale um número de horas <b>(por mês ou por atividade)</b> e tem um <b>limite</b> que pode somar no curso.
-          Some as horas até chegar ao total exigido e entregue os comprovantes à coordenação.</p>
-      </div>
-      <nav class="comp-atalhos" aria-label="Tipos de atividade">
-        ${grupos.map((g, i) => `<a href="#comp-${i}" data-grupo="${i}">${esc(g.titulo)}</a>`).join('')}
-      </nav>
-      ${grupos.map((g, i) => `
-        <section class="comp-grupo" id="comp-${i}" data-grupo="${i}">
-          <h3><span class="comp-art">${esc(g.artigo)}</span> ${esc(g.titulo)}</h3>
-          <ul class="comp-lista">
-            ${g.itens.map((item) => {
-              const [valor, unidade] = valorAtividade(item);
-              return `<li class="comp-item" data-busca="${esc(semAcento(`${g.titulo} ${item.d}`))}">
-                <span class="comp-desc">${esc(item.d)}</span>
-                <span class="comp-valor"><b>${valor}</b> ${unidade}</span>
-                <span class="comp-teto">até <b>${item.teto} h</b> no curso</span>
-              </li>`;
-            }).join('')}
-          </ul>
-        </section>`).join('')}
-      <p class="comp-vazio" hidden>Nenhuma atividade encontrada com esse termo.</p>
-      <p class="comp-fonte">Fonte: Resolução nº 01/2019 do Colegiado do Curso, alterada pela Resolução nº 01/2021.
-        Em caso de dúvida, vale o texto oficial nos
-        <a href="https://sigaa.ufrn.br/sigaa/public/curso/documentos.jsf?lc=pt_BR&amp;id=94598200&amp;idTipo=3" target="_blank" rel="noopener">documentos do curso no SIGAA</a>.</p>
+    <section class="complementares">
+      <p class="comp-resumo">${det ? `Você precisa de <b>${det.horas_complementares} h</b>. ` : ''}Cada atividade vale um número de horas e tem um máximo no curso.</p>
+      ${grupos.map((g) => {
+        return `
+        <details class="comp-grupo">
+          <summary>
+            <span class="comp-titulo">${esc(g.titulo)}</span>
+            <span class="comp-conta">${plural(g.itens.length, 'atividade', 'atividades')}</span>
+            <svg class="comp-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
+          </summary>
+          <ul class="comp-lista">${g.itens.map((item) => htmlAtividade(item, g)).join('')}</ul>
+        </details>`;
+      }).join('')}
+      <p class="comp-vazio" hidden>Nenhuma atividade encontrada.</p>
+      <p class="comp-fonte">Resolução nº 01/2019 do Colegiado do Curso (alterada pela nº 01/2021).
+        Na dúvida, vale o texto oficial nos <a href="https://sigaa.ufrn.br/sigaa/public/curso/documentos.jsf?lc=pt_BR&amp;id=94598200&amp;idTipo=3" target="_blank" rel="noopener">documentos do curso no SIGAA</a>.</p>
     </section>`;
 
+  const cartoes = [...document.querySelectorAll('.comp-grupo')];
+  let abertosAntes = null;   // lembra o que estava aberto antes de buscar
   $('#buscaComp').addEventListener('input', (e) => {
     const termos = semAcento(e.target.value.trim()).split(/\s+/).filter(Boolean);
+    if (termos.length && !abertosAntes) abertosAntes = cartoes.map((c) => c.open);
     let algum = false;
-    document.querySelectorAll('.comp-grupo').forEach((grupo) => {
+    cartoes.forEach((cartao, i) => {
       let visiveis = 0;
-      grupo.querySelectorAll('.comp-item').forEach((li) => {
+      cartao.querySelectorAll('.comp-item').forEach((li) => {
         const ok = termos.every((t) => li.dataset.busca.includes(t));
         li.hidden = !ok;
         if (ok) visiveis++;
       });
-      grupo.hidden = visiveis === 0;
-      document.querySelector(`.comp-atalhos [data-grupo="${grupo.dataset.grupo}"]`).hidden = visiveis === 0;
+      cartao.hidden = visiveis === 0;
+      if (termos.length) cartao.open = visiveis > 0;
+      else if (abertosAntes) cartao.open = abertosAntes[i];
       if (visiveis) algum = true;
     });
+    if (!termos.length) abertosAntes = null;
     document.querySelector('.comp-vazio').hidden = algum;
   });
-  $('.comp-atalhos').addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (!link) return;
-    e.preventDefault();
-    document.getElementById(link.getAttribute('href').slice(1))
-      .scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
-  });
+}
+
+// abre uma aba como se o botão dela tivesse sido clicado
+function irParaAba(id) {
+  document.querySelector(`#tipos .tipo[data-tipo="${id}"]`)?.click();
 }
 
 // ---------------------------------------------------------------------
@@ -534,8 +545,8 @@ function atualizarCabecalho(estrutura) {
       <b>${det.creditos_obrigatorios} créditos</b> obrigatórios <i>${det.creditos_obrigatorios * 15} h</i></span>
     <span class="carga" title="Créditos de disciplinas optativas exigidos na grade ${esc(nomeGrade(det.codigo))}">
       <b>${det.credito_optativas} créditos</b> optativos <i>${det.credito_optativas * 15} h</i></span>
-    <span class="carga" title="Horas de atividades complementares exigidas na grade ${esc(nomeGrade(det.codigo))}">
-      <b>${det.horas_complementares} h</b> complementares</span>
+    <button type="button" class="carga carga-link" data-ir="complementares" title="Ver o que conta como hora complementar">
+      <b>${det.horas_complementares} h</b> complementares</button>
     <span class="carga-grade">${esc(nomeGrade(det.codigo))}</span>`;
 }
 
