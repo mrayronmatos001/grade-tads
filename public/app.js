@@ -13,12 +13,13 @@ const FRASES = {
 };
 const ROTULOS_CURTOS = {
   buscar: 'Buscar', prerequisitos: 'Pré-requisitos', libera: 'O que libera',
-  grade: 'Grade completa', disponiveis: 'O que posso cursar', sugestoes: 'Sugestões',
+  grade: 'Grade completa', disponiveis: 'O que posso cursar',
+  complementares: 'Complementares', sugestoes: 'Sugestões',
 };
 // nomes da barra de navegação do celular
 const ROTULOS_BARRA = {
   buscar: 'Buscar', prerequisitos: 'Requisitos', libera: 'Libera',
-  grade: 'Grade', disponiveis: 'Cursar', sugestoes: 'Sugestões',
+  grade: 'Grade', disponiveis: 'Cursar', complementares: 'Horas', sugestoes: 'Sugerir',
 };
 const ICONES = {
   buscar: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
@@ -26,6 +27,7 @@ const ICONES = {
   libera: '<circle cx="5" cy="12" r="2.6"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7.6 11.4c4-1.6 5.4-4.2 9.2-5.2M7.6 12.6c4 1.6 5.4 4.2 9.2 5.2"/>',
   grade: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>',
   disponiveis: '<circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.3 2.6 2.6 5-5.4"/>',
+  complementares: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   sugestoes: '<path d="M4.5 5.5h15a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-4.5 3.5v-3.5h-1a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/>',
 };
 const htmlAba = (id, titulo, selecionada, extra = '') => `
@@ -103,6 +105,7 @@ async function iniciar() {
   }
 
   $('#tipos').innerHTML = consultas.map((c) => htmlAba(c.id, c.descricao, c.id === tipoAtual)).join('')
+    + htmlAba('complementares', 'Atividades que contam como horas complementares', false)
     + htmlAba('sugestoes', 'Envie uma sugestão ou avise sobre um erro', false, 'tipo-sugestoes');
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
@@ -114,6 +117,7 @@ async function iniciar() {
     // no celular, a barra fica embaixo: ao trocar de aba, volta para o topo da pergunta
     if (ehCelular()) window.scrollTo({ top: 0, behavior: semAnimacao() ? 'auto' : 'smooth' });
     if (tipoAtual === 'sugestoes') mostrarSugestoes();
+    else if (tipoAtual === 'complementares') mostrarComplementares();
     else montarFrase();
   });
 
@@ -132,6 +136,84 @@ async function iniciar() {
     else abrirEscolha(botao);
   });
   montarFrase();
+}
+
+// ---------------------------------------------------------------------
+// Aba "Horas complementares": tabela da resolução do curso, com busca
+// ---------------------------------------------------------------------
+function valorAtividade(item) {
+  switch (item.por) {
+    case 'mes': return [`${item.chi} h`, 'por mês'];
+    case 'total': return ['Carga total', 'do curso feito'];
+    case 'dobro': return ['2× a carga', 'do minicurso'];
+    case 'metade': return ['½ da carga', 'do evento'];
+    default: return [`${item.chi} h`, 'por atividade'];
+  }
+}
+
+function mostrarComplementares() {
+  const grupos = window.ATIVIDADES_COMPLEMENTARES || [];
+  const det = (opcoes.detalhes || {})[[...(opcoes.estruturas || [])].sort().reverse()[0]];
+  $('#frase').textContent = 'Quais atividades contam como horas complementares, e quanto cada uma vale?';
+  $('#erroForm').textContent = '';
+  $('#extra').innerHTML = `
+    <label class="comp-busca">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+      <input type="search" id="buscaComp" placeholder="Procure uma atividade (ex.: monitoria, hackathon, estágio)" autocomplete="off" aria-label="Procurar atividade">
+    </label>`;
+  $('#resultado').innerHTML = `
+    <section class="resposta-visual complementares">
+      <div class="comp-intro">
+        ${det ? `<p class="comp-meta"><b>${det.horas_complementares} h</b> de atividades complementares na grade ${esc(nomeGrade(det.codigo))}</p>` : ''}
+        <p>Cada atividade vale um número de horas <b>(por mês ou por atividade)</b> e tem um <b>limite</b> que pode somar no curso.
+          Some as horas até chegar ao total exigido e entregue os comprovantes à coordenação.</p>
+      </div>
+      <nav class="comp-atalhos" aria-label="Tipos de atividade">
+        ${grupos.map((g, i) => `<a href="#comp-${i}" data-grupo="${i}">${esc(g.titulo)}</a>`).join('')}
+      </nav>
+      ${grupos.map((g, i) => `
+        <section class="comp-grupo" id="comp-${i}" data-grupo="${i}">
+          <h3><span class="comp-art">${esc(g.artigo)}</span> ${esc(g.titulo)}</h3>
+          <ul class="comp-lista">
+            ${g.itens.map((item) => {
+              const [valor, unidade] = valorAtividade(item);
+              return `<li class="comp-item" data-busca="${esc(semAcento(`${g.titulo} ${item.d}`))}">
+                <span class="comp-desc">${esc(item.d)}</span>
+                <span class="comp-valor"><b>${valor}</b> ${unidade}</span>
+                <span class="comp-teto">até <b>${item.teto} h</b> no curso</span>
+              </li>`;
+            }).join('')}
+          </ul>
+        </section>`).join('')}
+      <p class="comp-vazio" hidden>Nenhuma atividade encontrada com esse termo.</p>
+      <p class="comp-fonte">Fonte: Resolução nº 01/2019 do Colegiado do Curso, alterada pela Resolução nº 01/2021.
+        Em caso de dúvida, vale o texto oficial nos
+        <a href="https://sigaa.ufrn.br/sigaa/public/curso/documentos.jsf?lc=pt_BR&amp;id=94598200&amp;idTipo=3" target="_blank" rel="noopener">documentos do curso no SIGAA</a>.</p>
+    </section>`;
+
+  $('#buscaComp').addEventListener('input', (e) => {
+    const termos = semAcento(e.target.value.trim()).split(/\s+/).filter(Boolean);
+    let algum = false;
+    document.querySelectorAll('.comp-grupo').forEach((grupo) => {
+      let visiveis = 0;
+      grupo.querySelectorAll('.comp-item').forEach((li) => {
+        const ok = termos.every((t) => li.dataset.busca.includes(t));
+        li.hidden = !ok;
+        if (ok) visiveis++;
+      });
+      grupo.hidden = visiveis === 0;
+      document.querySelector(`.comp-atalhos [data-grupo="${grupo.dataset.grupo}"]`).hidden = visiveis === 0;
+      if (visiveis) algum = true;
+    });
+    document.querySelector('.comp-vazio').hidden = algum;
+  });
+  $('.comp-atalhos').addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    e.preventDefault();
+    document.getElementById(link.getAttribute('href').slice(1))
+      .scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+  });
 }
 
 // ---------------------------------------------------------------------

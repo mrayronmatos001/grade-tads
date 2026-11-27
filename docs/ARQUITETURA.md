@@ -89,5 +89,6 @@ banco diretamente com o usuário do PostgreSQL.
 | `sql/atualizacao_sugestoes.sql` | Atualização de um banco existente: tabela de sugestões |
 | `sql/atualizacao_ementas.sql` | Atualização de um banco existente: ementas e correção de créditos |
 | `public/index.html`, `app.js`, `style.css` | A página |
+| `public/complementares.js` | Tabela das atividades complementares (resolução do colegiado). Para atualizar, edite este arquivo |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |
 | `.github/workflows/manter-ativo.yml` | Acesso periódico que evita a pausa do Supabase gratuito |

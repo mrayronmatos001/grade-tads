@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## 2.8.0
+- Nova aba "Complementares" (no celular, "Horas"): tabela das atividades que
+  contam como horas complementares, separadas por tipo (Arts. 5º a 9º da
+  Resolução nº 01/2019 do Colegiado, alterada pela nº 01/2021), com quanto cada
+  uma vale e o limite no curso. Tem busca sem acentos e atalhos por tipo.
+- Os dados ficam em `public/complementares.js` (sem mudança no banco).
+- A barra inferior do celular passou a ter 7 botões; "Sugestões" virou "Sugerir".
+
 ## 2.7.2
 - Correção: no desktop, clicar em Algoritmos e Programação (ou em outra
   disciplina que libera várias) fazia o fluxo recomeçar sem parar. O cartão
