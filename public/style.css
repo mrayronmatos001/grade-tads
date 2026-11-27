@@ -1504,30 +1504,36 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 /* =====================================================================
    Optativas (grade completa e "O que posso cursar")
    ===================================================================== */
-.optativas { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--linha); scroll-margin-top: 16px; }
-.opt-cabeca { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
-.opt-cabeca h3 { margin: 0; font-family: var(--display); font-size: 1.15rem; }
-.opt-cabeca span { color: var(--tinta-suave); font-size: 0.92rem; }
-.opt-cabeca b { color: var(--baoba-texto, var(--baoba)); font-family: var(--display); }
-.opt-nota { margin: 6px 0 0; font-size: 0.86rem; color: var(--tinta-suave); }
-.opt-grupo { margin: 18px 0 8px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tinta-suave); }
-.opt-lista {
-  list-style: none; margin: 0; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px;
+.optativas {
+  margin-top: 22px; scroll-margin-top: 16px;
+  border: 1px solid var(--linha); border-radius: 16px;
 }
-.opt-item {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px;
-  padding: 10px 12px;
-  background: var(--folha);
-  border: 1px solid var(--linha); border-radius: 12px;
+.optativas summary {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; cursor: pointer; list-style: none;
 }
-.opt-item .chip-cod { font-size: 0.7rem; padding: 1px 7px; }
-.opt-nome { font-weight: 600; font-size: 0.92rem; line-height: 1.3; }
-.opt-horas { font-size: 0.82rem; color: var(--tinta-suave); white-space: nowrap; }
+.optativas summary::-webkit-details-marker { display: none; }
+.optativas summary:focus-visible { outline: 3px solid var(--foco); outline-offset: -3px; border-radius: 16px; }
+.optativas[open] .comp-seta { transform: rotate(180deg); }
+.opt-titulo { font-family: var(--display); font-weight: 700; font-size: 1.02rem; color: var(--tinta); }
+.optativas summary:hover .opt-titulo { color: var(--baoba-texto, var(--baoba)); }
+.opt-meta { margin-left: auto; font-size: 0.85rem; color: var(--tinta-suave); }
+.opt-corpo { padding: 0 18px 14px; }
+.opt-nota { margin: 0; font-size: 0.85rem; color: var(--tinta-suave); }
+.opt-grupo { margin: 16px 0 4px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--tinta-suave); }
+.opt-lista { list-style: none; margin: 0; padding: 0; columns: 3 240px; column-gap: 32px; }
+.opt-lista li {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 7px 0; border-bottom: 1px solid var(--linha);
+  break-inside: avoid; font-size: 0.92rem;
+}
+.opt-nome { line-height: 1.35; }
+.opt-horas { flex: none; font-size: 0.8rem; color: var(--tinta-suave); }
 
 .etapa-opt .etapa-marco span { font-size: 1.1rem; }
 #horasOptativas.completo { color: var(--certo); font-weight: 700; }
 
 @media (max-width: 720px) {
-  .opt-lista { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .optativas summary { padding: 14px 16px; }
+  .opt-corpo { padding: 0 16px 12px; }
 }

@@ -1,5 +1,12 @@
 # Histórico de versões
 
+## 2.9.1
+- Optativas na grade completa: viraram uma barra fechada embaixo do mapa
+  ("Optativas · 240 h exigidas · 33 opções"); ao abrir, uma lista simples em
+  colunas, com nome e carga horária, sem uma caixa para cada disciplina.
+- O atalho "créditos optativos" do cabeçalho abre a barra e rola até ela,
+  também quando a grade completa já está na tela.
+
 ## 2.9.0
 - Optativas da grade TADS 2019 (33, conforme a lista do SIGAA):
   - Grade completa: seção "Optativas" embaixo do mapa, separada entre as do

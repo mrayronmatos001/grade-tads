@@ -112,12 +112,17 @@ async function iniciar() {
     const link = e.target.closest('[data-ir]');
     if (!link) return;
     e.preventDefault();   // o contador fica dentro do link do logotipo
-    ancoraPendente = link.dataset.ancora || null;
-    const jaAberta = tipoAtual === link.dataset.ir;
+    const ancora = link.dataset.ancora || null;
+    const alvo = ancora && tipoAtual === link.dataset.ir && document.getElementById(ancora);
+    if (alvo) {
+      // a aba já está aberta com a seção na tela: só abre e rola até ela
+      if (alvo.tagName === 'DETAILS') alvo.open = true;
+      alvo.scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+      return;
+    }
+    ancoraPendente = ancora;
     irParaAba(link.dataset.ir);
-    const alvo = ancoraPendente && jaAberta && document.getElementById(ancoraPendente);
-    if (alvo) { ancoraPendente = null; alvo.scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' }); }
-    else if (!ancoraPendente && !ehCelular()) $('#formulario').scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+    if (!ancora && !ehCelular()) $('#formulario').scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
   });
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
@@ -910,6 +915,7 @@ function mostrar(dados) {
   if (ancoraPendente) {
     const alvo = document.getElementById(ancoraPendente);
     ancoraPendente = null;
+    if (alvo?.tagName === 'DETAILS') alvo.open = true;
     alvo?.scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
   }
 }
@@ -1059,7 +1065,8 @@ function desenharGradeFluxo(ctx, dados) {
     ${(ctx.filtro || 'todos') === 'todos' ? htmlOptativas(ctx.estrutura) : ''}`;
 }
 
-// optativas da grade, em dois grupos: do curso (TAD) e de outros departamentos
+// optativas da grade: barra fechada embaixo do mapa; ao abrir, lista simples
+// em dois grupos (do curso e de outros departamentos)
 function htmlOptativas(estrutura) {
   const lista = (opcoes.optativas || {})[estrutura] || [];
   if (!lista.length) return '';
@@ -1070,21 +1077,20 @@ function htmlOptativas(estrutura) {
     ['De outros departamentos', lista.filter((o) => !o.codigo.startsWith('TAD'))],
   ].filter(([, itens]) => itens.length);
   return `
-    <section class="optativas" id="secao-optativas">
-      <div class="opt-cabeca">
-        <h3>Optativas</h3>
-        <span>${minimo ? `você precisa de <b>${minimo} h</b> · ` : ''}${plural(lista.length, 'opção', 'opções')}</span>
+    <details class="optativas" id="secao-optativas">
+      <summary>
+        <span class="opt-titulo">Optativas</span>
+        <span class="opt-meta">${minimo ? `${minimo} h exigidas · ` : ''}${plural(lista.length, 'opção', 'opções')}</span>
+        <svg class="comp-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
+      </summary>
+      <div class="opt-corpo">
+        <p class="opt-nota">Algumas têm pré-requisito: confira no SIGAA antes de se matricular.</p>
+        ${grupos.map(([titulo, itens]) => `
+          <h4 class="opt-grupo">${titulo}</h4>
+          <ul class="opt-lista">${itens.map((o) => `
+            <li><span class="opt-nome">${esc(bonito(o.nome))}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`).join('')}</ul>`).join('')}
       </div>
-      <p class="opt-nota">Algumas optativas têm pré-requisito. Confira no SIGAA antes de se matricular.</p>
-      ${grupos.map(([titulo, itens]) => `
-        <h4 class="opt-grupo">${titulo}</h4>
-        <ul class="opt-lista">${itens.map((o) => `
-          <li class="opt-item">
-            <code class="chip-cod">${esc(o.codigo)}</code>
-            <span class="opt-nome">${esc(bonito(o.nome))}</span>
-            <span class="opt-horas">${horasDe(o.creditos)} h</span>
-          </li>`).join('')}</ul>`).join('')}
-    </section>`;
+    </details>`;
 }
 
 // caminho com cantos arredondados passando pelos pontos dados
