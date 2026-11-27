@@ -89,6 +89,7 @@ banco diretamente com o usuário do PostgreSQL.
 | `sql/atualizacao_sugestoes.sql` | Atualização de um banco existente: tabela de sugestões |
 | `sql/atualizacao_ementas.sql` | Atualização de um banco existente: ementas e correção de créditos |
 | `sql/atualizacao_optativas.sql` | Atualização de um banco existente: optativas da grade TADS 2019 |
+| `sql/atualizacao_prerequisitos_optativas.sql` | Atualização de um banco existente: pré-requisitos das optativas (PPC) |
 | `public/index.html`, `app.js`, `style.css` | A página |
 | `public/complementares.js` | Tabela das atividades complementares (resolução do colegiado). Para atualizar, edite este arquivo |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |

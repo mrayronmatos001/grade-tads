@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## 2.11.0
+- Pré-requisitos das optativas, conforme a tabela de optativas do PPC
+  (estrutura 03): 10 optativas têm pré-requisito e aparecem com "requer ..."
+  na lista e como "Bloqueada" em "O que posso cursar" até ele ser marcado.
+- As 11 optativas criadas depois do PPC ficam marcadas com * e a nota pede
+  para conferir o pré-requisito no SIGAA.
+- Banco: nova migração `sql/atualizacao_prerequisitos_optativas.sql` (pode
+  rodar mais de uma vez; rode depois de `atualizacao_optativas.sql`).
+
 ## 2.10.0
 - Painel de detalhes no desktop: deixou de ser uma coluna da altura da tela
   e virou um cartão compacto no canto de baixo (nome, créditos, horas e

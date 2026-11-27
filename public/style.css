@@ -1582,3 +1582,4 @@ body.com-detalhe { padding-bottom: 150px; }
 @media (max-width: 720px) {
   .detalhe:not(.recolhido) .detalhe-linha-curta { bottom: -14px; margin: 12px -14px -14px; padding: 10px 14px; }
 }
+.opt-asterisco { color: var(--ciano); font-weight: 700; }

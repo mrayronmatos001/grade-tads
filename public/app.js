@@ -1073,6 +1073,12 @@ function desenharGradeFluxo(ctx, dados) {
     ${(ctx.filtro || 'todos') === 'todos' ? htmlOptativas(ctx.estrutura) : ''}`;
 }
 
+// optativas criadas depois do PPC: o pré-requisito delas não está no banco
+const OPTATIVAS_FORA_DO_PPC = new Set([
+  'CCA0405', 'CCA0406', 'CCA0407', 'CCA0408', 'TAD0066', 'TAD0067',
+  'TAD0068', 'TAD0069', 'TAD0070', 'TAD0072', 'TAD0473',
+]);
+
 // 'TAD0103 E (TAD0009 OU TAD0102)' -> 'Banco de Dados e Programação… ou Algoritmos…'
 function textoRequisitos(texto) {
   return lerGrupos(texto).map((g) => g.map((c) => bonito(nomeDe(c))).join(' ou ')).join(' e ');
@@ -1089,7 +1095,7 @@ function htmlOptativas(estrutura) {
     ['Do curso', lista.filter((o) => o.codigo.startsWith('TAD'))],
     ['De outros departamentos', lista.filter((o) => !o.codigo.startsWith('TAD'))],
   ].filter(([, itens]) => itens.length);
-  const comRequisito = lista.some((o) => textoRequisitos(o.prerequisitos));
+  const semInformacao = lista.some((o) => OPTATIVAS_FORA_DO_PPC.has(o.codigo));
   return `
     <details class="optativas" id="secao-optativas">
       <summary>
@@ -1098,12 +1104,13 @@ function htmlOptativas(estrutura) {
         <svg class="comp-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
       </summary>
       <div class="opt-corpo">
-        ${comRequisito ? '' : '<p class="opt-nota">Algumas têm pré-requisito: confira no SIGAA antes de se matricular.</p>'}
+        <p class="opt-nota">Pré-requisitos conforme o PPC do curso.${semInformacao ? ' <span class="opt-asterisco">*</span> Criada depois do PPC: confira o pré-requisito no SIGAA.' : ''}</p>
         ${grupos.map(([titulo, itens]) => `
           <h4 class="opt-grupo">${titulo}</h4>
           <ul class="opt-lista">${itens.map((o) => {
             const req = textoRequisitos(o.prerequisitos);
-            return `<li><span class="opt-nome">${esc(bonito(o.nome))}${req ? `<small class="opt-req">requer ${esc(req)}</small>` : ''}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`;
+            const asterisco = OPTATIVAS_FORA_DO_PPC.has(o.codigo) ? ' <span class="opt-asterisco" title="Criada depois do PPC: confira o pré-requisito no SIGAA">*</span>' : '';
+            return `<li><span class="opt-nome">${esc(bonito(o.nome))}${asterisco}${req ? `<small class="opt-req">requer ${esc(req)}</small>` : ''}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`;
           }).join('')}</ul>`).join('')}
       </div>
     </details>`;
