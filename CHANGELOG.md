@@ -1,5 +1,16 @@
 # Histórico de versões
 
+## 2.10.0
+- Painel de detalhes no desktop: deixou de ser uma coluna da altura da tela
+  e virou um cartão compacto no canto de baixo (nome, créditos, horas e
+  faltas). "Ver mais" abre o resto; o botão "Recolher" fica fixo no rodapé.
+- O texto longo de instruções embaixo do mapa virou uma legenda curta acima
+  dele: 1 clique o que libera (azul), 2 cliques pré-requisitos (verde),
+  3 cliques solta.
+- Optativas com pré-requisito cadastrado mostram "requer ..." na lista e
+  aparecem como "Bloqueada" em "O que posso cursar" até o pré-requisito ser
+  marcado. (Os pré-requisitos das optativas ainda precisam ser cadastrados.)
+
 ## 2.9.1
 - Optativas na grade completa: viraram uma barra fechada embaixo do mapa
   ("Optativas · 240 h exigidas · 33 opções"); ao abrir, uma lista simples em

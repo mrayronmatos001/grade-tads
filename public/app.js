@@ -820,8 +820,11 @@ function desenharTrilha(caixa, estrutura) {
     let horasOpt = 0;
     caixa.querySelectorAll('.etiqueta-opt').forEach((el) => {
       const feita = feitas.has(el.dataset.codigo);
+      const livre = satisfeita(el.dataset.codigo, feitas);
       el.classList.toggle('concluida', feita);
-      el.querySelector('.estado').textContent = feita ? 'Concluída' : '';
+      el.classList.toggle('bloqueada', !feita && !livre);
+      el.querySelector('.estado').textContent = feita ? 'Concluída' : !livre ? 'Bloqueada' : '';
+      el.title = !feita && !livre ? `Requer: ${textoRequisitos((((opcoes.optativas || {})[estrutura] || []).find((o) => o.codigo === el.dataset.codigo) || {}).prerequisitos)}` : '';
       if (feita) horasOpt += Number(el.dataset.horas);
     });
     const minimoOpt = ((opcoes.detalhes || {})[estrutura]?.credito_optativas || 0) * 15;
@@ -924,7 +927,8 @@ function mostrar(dados) {
 // Cadeia completa de pré-requisitos (expande até a base)
 // ---------------------------------------------------------------------
 function prerequisitosNaGrade(estrutura, codigo) {
-  const c = (opcoes.componentes[estrutura] || []).find((x) => x.codigo === codigo);
+  const c = [...(opcoes.componentes[estrutura] || []), ...((opcoes.optativas || {})[estrutura] || [])]
+    .find((x) => x.codigo === codigo);
   return lerGrupos(c?.prerequisitos);
 }
 
@@ -1057,12 +1061,21 @@ function desenharGradeFluxo(ctx, dados) {
 
   return `<p class="resumo">${resumo}</p>
     ${semPeriodo ? '<p class="aviso-fonte">Os períodos ainda não estão no banco. Rode o script de períodos para organizar a grade por semestre.</p>' : ''}
+    <ul class="dica-mapa" aria-label="Como usar o mapa">
+      <li><span class="dica-ponto azul"></span><b>1 clique</b> o que libera</li>
+      <li><span class="dica-ponto verde"></span><b>2 cliques</b> pré-requisitos</li>
+      <li><b>3 cliques</b> solta</li>
+    </ul>
     <div class="mapa-rolagem"><div class="mapa" data-mapa="${id}" data-estrutura="${esc(ctx.estrutura)}" style="--colunas:${colunas}">
       <svg class="mapa-fios" aria-hidden="true"><g class="fios-base"></g><g class="fios-ativos"></g></svg>
       ${linhas}
     </div></div>
-    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul) e abrir os detalhes; clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>
     ${(ctx.filtro || 'todos') === 'todos' ? htmlOptativas(ctx.estrutura) : ''}`;
+}
+
+// 'TAD0103 E (TAD0009 OU TAD0102)' -> 'Banco de Dados e Programação… ou Algoritmos…'
+function textoRequisitos(texto) {
+  return lerGrupos(texto).map((g) => g.map((c) => bonito(nomeDe(c))).join(' ou ')).join(' e ');
 }
 
 // optativas da grade: barra fechada embaixo do mapa; ao abrir, lista simples
@@ -1076,6 +1089,7 @@ function htmlOptativas(estrutura) {
     ['Do curso', lista.filter((o) => o.codigo.startsWith('TAD'))],
     ['De outros departamentos', lista.filter((o) => !o.codigo.startsWith('TAD'))],
   ].filter(([, itens]) => itens.length);
+  const comRequisito = lista.some((o) => textoRequisitos(o.prerequisitos));
   return `
     <details class="optativas" id="secao-optativas">
       <summary>
@@ -1084,11 +1098,13 @@ function htmlOptativas(estrutura) {
         <svg class="comp-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
       </summary>
       <div class="opt-corpo">
-        <p class="opt-nota">Algumas têm pré-requisito: confira no SIGAA antes de se matricular.</p>
+        ${comRequisito ? '' : '<p class="opt-nota">Algumas têm pré-requisito: confira no SIGAA antes de se matricular.</p>'}
         ${grupos.map(([titulo, itens]) => `
           <h4 class="opt-grupo">${titulo}</h4>
-          <ul class="opt-lista">${itens.map((o) => `
-            <li><span class="opt-nome">${esc(bonito(o.nome))}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`).join('')}</ul>`).join('')}
+          <ul class="opt-lista">${itens.map((o) => {
+            const req = textoRequisitos(o.prerequisitos);
+            return `<li><span class="opt-nome">${esc(bonito(o.nome))}${req ? `<small class="opt-req">requer ${esc(req)}</small>` : ''}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`;
+          }).join('')}</ul>`).join('')}
       </div>
     </details>`;
 }
@@ -1621,7 +1637,7 @@ function desenharLigacoes(palco, cadeia) {
 // A resposta desenhada para o aluno, uma forma para cada pergunta
 // ---------------------------------------------------------------------
 function nomeDe(codigo) {
-  for (const lista of Object.values(opcoes.componentes)) {
+  for (const lista of [...Object.values(opcoes.componentes), ...Object.values(opcoes.optativas || {})]) {
     const c = lista.find((x) => x.codigo === codigo);
     if (c) return c.nome;
   }

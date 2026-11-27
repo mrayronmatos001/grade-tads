@@ -76,7 +76,16 @@ WHERE ementa IS NOT NULL`,
     interna: true,
     sql: () => ({
       texto: `
-SELECT cde.estrutura_codigo AS estrutura, c.codigo, c.nome, c.creditos
+SELECT cde.estrutura_codigo AS estrutura, c.codigo, c.nome, c.creditos,
+       COALESCE((
+         SELECT json_agg(s.alternativas)
+         FROM (SELECT array_agg(i.componente_codigo ORDER BY i.componente_codigo) AS alternativas
+               FROM grupo_de_prerequisito g
+               JOIN item_do_grupo_de_prerequisito i ON i.gp_prerequisito_id = g.id
+               WHERE g.estrutura_codigo  = cde.estrutura_codigo
+                 AND g.componente_codigo = cde.componente_codigo
+               GROUP BY g.id) s
+       ), '[]'::json) AS grupos
 FROM componente_da_estrutura_curricular cde
 JOIN componente c ON c.codigo = cde.componente_codigo
 WHERE cde.natureza = 'OPTATIVA'
@@ -86,7 +95,9 @@ ORDER BY c.nome`,
     normalizar: (linhas) => {
       const porGrade = {};
       for (const l of linhas) {
-        (porGrade[l.estrutura] ||= []).push({ codigo: l.codigo, nome: l.nome, creditos: Number(l.creditos) });
+        (porGrade[l.estrutura] ||= []).push({
+          codigo: l.codigo, nome: l.nome, creditos: Number(l.creditos), prerequisitos: formatarGrupos(l.grupos),
+        });
       }
       return porGrade;
     },
