@@ -44,7 +44,8 @@ app.get('/api/opcoes', async (req, res) => {
     // ementas: se a coluna ainda não existir no banco, a página funciona sem elas
     let ementas = {};
     try { ementas = consultas.ementas.normalizar(await executar(consultas.ementas.sql())); } catch { /* sem ementas */ }
-    res.json({ estruturas, componentes, detalhes, ementas });
+    const optativas = consultas.optativas.normalizar(await executar(consultas.optativas.sql()));
+    res.json({ estruturas, componentes, optativas, detalhes, ementas });
   } catch (e) {
     res.status(503).json({ erro: 'Não foi possível acessar o banco de dados. Confira o arquivo .env.' });
   }

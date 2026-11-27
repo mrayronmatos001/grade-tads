@@ -1,5 +1,19 @@
 # Histórico de versões
 
+## 2.9.0
+- Optativas da grade TADS 2019 (33, conforme a lista do SIGAA):
+  - Grade completa: seção "Optativas" embaixo do mapa, separada entre as do
+    curso e as de outros departamentos, com a carga horária de cada uma.
+  - O que posso cursar: as optativas podem ser marcadas (ou vêm do histórico
+    importado) e um contador mostra quantas horas faltam para as 240 h.
+  - Busca: a grade aparece como "TADS 2019 · optativa".
+  - Clicar em "créditos optativos" no cabeçalho abre a grade nas optativas.
+- Banco: nova migração `sql/atualizacao_optativas.sql` (pode rodar mais de uma
+  vez). O nome das disciplinas passou de 60 para 100 caracteres.
+- Os pré-requisitos das optativas não estão cadastrados (a lista do SIGAA não
+  traz), por isso elas não aparecem como "Liberada" nem nas abas de
+  pré-requisitos; a página avisa para conferir no SIGAA.
+
 ## 2.8.1
 - Aba "Complementares" mais limpa: cada tipo de atividade virou um cartão que
   abre e fecha; atividades que só mudam pelo âmbito (local, nacional,

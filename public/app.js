@@ -38,7 +38,8 @@ const htmlAba = (id, titulo, selecionada, extra = '') => `
   </button>`;
 
 let consultas = [];
-let opcoes = { estruturas: [], componentes: {} };
+let opcoes = { estruturas: [], componentes: {}, optativas: {} };
+let ancoraPendente = null;   // rola até esta seção quando a resposta chegar
 let tipoAtual = 'prerequisitos';
 let ultimoContexto = {};
 
@@ -111,8 +112,12 @@ async function iniciar() {
     const link = e.target.closest('[data-ir]');
     if (!link) return;
     e.preventDefault();   // o contador fica dentro do link do logotipo
+    ancoraPendente = link.dataset.ancora || null;
+    const jaAberta = tipoAtual === link.dataset.ir;
     irParaAba(link.dataset.ir);
-    if (!ehCelular()) $('#formulario').scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+    const alvo = ancoraPendente && jaAberta && document.getElementById(ancoraPendente);
+    if (alvo) { ancoraPendente = null; alvo.scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' }); }
+    else if (!ancoraPendente && !ehCelular()) $('#formulario').scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
   });
   $('#tipos').addEventListener('click', (e) => {
     const botao = e.target.closest('.tipo');
@@ -543,8 +548,8 @@ function atualizarCabecalho(estrutura) {
   $('#cargas').innerHTML = `
     <span class="carga" title="Créditos das disciplinas obrigatórias da grade ${esc(nomeGrade(det.codigo))}">
       <b>${det.creditos_obrigatorios} créditos</b> obrigatórios <i>${det.creditos_obrigatorios * 15} h</i></span>
-    <span class="carga" title="Créditos de disciplinas optativas exigidos na grade ${esc(nomeGrade(det.codigo))}">
-      <b>${det.credito_optativas} créditos</b> optativos <i>${det.credito_optativas * 15} h</i></span>
+    <button type="button" class="carga carga-link" data-ir="grade" data-ancora="secao-optativas" title="Ver as optativas da grade">
+      <b>${det.credito_optativas} créditos</b> optativos <i>${det.credito_optativas * 15} h</i></button>
     <button type="button" class="carga carga-link" data-ir="complementares" title="Ver o que conta como hora complementar">
       <b>${det.horas_complementares} h</b> complementares</button>
     <span class="carga-grade">${esc(nomeGrade(det.codigo))}</span>`;
@@ -668,7 +673,7 @@ async function importarHistorico(arquivo) {
 function aplicarHistorico() {
   if (!historico || !trilhaAtual) return;
   const estrutura = $('#frase input[name="estrutura"]')?.value;
-  const naGrade = new Set((opcoes.componentes[estrutura] || []).map((c) => c.codigo));
+  const naGrade = new Set([...(opcoes.componentes[estrutura] || []), ...((opcoes.optativas || {})[estrutura] || [])].map((c) => c.codigo));
   const concluidas = [...historico.aprovados, ...(historico.contarMatriculadas ? historico.matriculados : [])];
   trilhaAtual.marcar(concluidas.filter((c) => naGrade.has(c)));
 
@@ -681,7 +686,7 @@ function aplicarHistorico() {
     <span>Histórico${historico.primeiroNome ? ` de <strong>${esc(historico.primeiroNome)}</strong>` : ''} importado:
       <strong>${plural(aprovadasNaGrade, 'disciplina aprovada', 'disciplinas aprovadas')}</strong> da grade ${esc(nomeGrade(estrutura))}${
       matrNaGrade.length ? ` e <strong>${plural(matrNaGrade.length, 'matrícula', 'matrículas')}</strong>${historico.periodoMatr ? ` em ${historico.periodoMatr}` : ''}` : ''}.${
-      fora ? ` ${plural(fora, 'componente fora da grade foi ignorado', 'componentes fora da grade foram ignorados')} (optativas).` : ''}${
+      fora ? ` ${plural(fora, 'componente fora da grade foi ignorado', 'componentes fora da grade foram ignorados')}.` : ''}${
       !historico.ehTads ? ' Atenção: esse histórico não parece ser do TADS.' : ''}${
       historico.anoCurriculo && !historico.estrutura ? ` O currículo ${historico.anoCurriculo} não está cadastrado; usei a grade escolhida.` : ''}</span>
     ${matrNaGrade.length ? `<label class="historico-opcao"><input type="checkbox" id="contarMatr" ${historico.contarMatriculadas ? 'checked' : ''}>
@@ -719,6 +724,25 @@ function etapasDaGrade(estrutura) {
   return lista.map((c) => ({ ...c, etapa: etapa(c.codigo) }));
 }
 
+function htmlOptativasTrilha(estrutura) {
+  const lista = (opcoes.optativas || {})[estrutura] || [];
+  if (!lista.length) return '';
+  return `
+    <section class="etapa etapa-opt">
+      <div class="etapa-marco" aria-hidden="true"><span>+</span></div>
+      <div class="etapa-corpo">
+        <h4>Optativas <small id="horasOptativas"></small></h4>
+        <div class="etapa-itens">
+          ${lista.map((c) => `
+            <label class="etiqueta etiqueta-opt" data-codigo="${c.codigo}" data-horas="${horasDe(c.creditos)}">
+              <input type="checkbox" name="concluidas" value="${c.codigo}">
+              <span><code>${c.codigo}</code><b>${esc(bonito(c.nome))}</b><em class="estado"></em></span>
+            </label>`).join('')}
+        </div>
+      </div>
+    </section>`;
+}
+
 function desenharTrilha(caixa, estrutura) {
   const porPeriodo = (opcoes.componentes[estrutura] || []).every((c) => c.periodo);
   const itens = porPeriodo
@@ -744,7 +768,7 @@ function desenharTrilha(caixa, estrutura) {
             </label>`).join('')}
         </div>
       </div>
-    </section>`).join('');
+    </section>`).join('') + htmlOptativasTrilha(estrutura);
 
   const marcadas = () => new Set([...caixa.querySelectorAll('input:checked')].map((i) => i.value));
   const satisfeita = (codigo, feitas) =>
@@ -774,7 +798,7 @@ function desenharTrilha(caixa, estrutura) {
 
   const atualizar = () => {
     const feitas = marcadas();
-    caixa.querySelectorAll('.etiqueta').forEach((el) => {
+    caixa.querySelectorAll('.etiqueta:not(.etiqueta-opt)').forEach((el) => {
       const c = el.dataset.codigo;
       const grupos = prerequisitosNaGrade(estrutura, c);
       const feita = feitas.has(c);
@@ -787,6 +811,20 @@ function desenharTrilha(caixa, estrutura) {
       el.querySelector('.estado').textContent = feita ? 'Concluída' : !livre ? 'Bloqueada' : 'Liberada';
       el.title = !feita && !livre ? `Falta: ${faltam.join('; ')}` : '';
     });
+    // optativas: sem pré-requisitos cadastrados, só contam as horas
+    let horasOpt = 0;
+    caixa.querySelectorAll('.etiqueta-opt').forEach((el) => {
+      const feita = feitas.has(el.dataset.codigo);
+      el.classList.toggle('concluida', feita);
+      el.querySelector('.estado').textContent = feita ? 'Concluída' : '';
+      if (feita) horasOpt += Number(el.dataset.horas);
+    });
+    const minimoOpt = ((opcoes.detalhes || {})[estrutura]?.credito_optativas || 0) * 15;
+    const marcadorOpt = caixa.querySelector('#horasOptativas');
+    if (marcadorOpt) {
+      marcadorOpt.textContent = minimoOpt ? `${horasOpt} de ${minimoOpt} h${horasOpt >= minimoOpt ? ' ✓' : ''}` : `${horasOpt} h`;
+      marcadorOpt.classList.toggle('completo', minimoOpt > 0 && horasOpt >= minimoOpt);
+    }
     const n = feitas.size;
     $('#qtdConcluidas').textContent = n === 0 ? 'Nenhuma marcada' : n === 1 ? '1 disciplina marcada' : `${n} disciplinas marcadas`;
     mostrarDisponiveis(estrutura, feitas);
@@ -869,6 +907,11 @@ function mostrar(dados) {
     ${desenharResposta(tipoAtual, dados, ultimoContexto)}</section>`;
   prepararLigacoes();
   prepararMapas();
+  if (ancoraPendente) {
+    const alvo = document.getElementById(ancoraPendente);
+    ancoraPendente = null;
+    alvo?.scrollIntoView({ behavior: semAnimacao() ? 'auto' : 'smooth', block: 'start' });
+  }
 }
 
 // ---------------------------------------------------------------------
@@ -1012,7 +1055,36 @@ function desenharGradeFluxo(ctx, dados) {
       <svg class="mapa-fios" aria-hidden="true"><g class="fios-base"></g><g class="fios-ativos"></g></svg>
       ${linhas}
     </div></div>
-    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul) e abrir os detalhes; clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>`;
+    <p class="dica-clique">Passe o mouse sobre uma disciplina para ver o que ela libera. Clique para fixar o que ela libera (azul) e abrir os detalhes; clique de novo para ver os pré-requisitos (verde); uma terceira vez solta.</p>
+    ${(ctx.filtro || 'todos') === 'todos' ? htmlOptativas(ctx.estrutura) : ''}`;
+}
+
+// optativas da grade, em dois grupos: do curso (TAD) e de outros departamentos
+function htmlOptativas(estrutura) {
+  const lista = (opcoes.optativas || {})[estrutura] || [];
+  if (!lista.length) return '';
+  const det = (opcoes.detalhes || {})[estrutura];
+  const minimo = det ? det.credito_optativas * 15 : null;
+  const grupos = [
+    ['Do curso', lista.filter((o) => o.codigo.startsWith('TAD'))],
+    ['De outros departamentos', lista.filter((o) => !o.codigo.startsWith('TAD'))],
+  ].filter(([, itens]) => itens.length);
+  return `
+    <section class="optativas" id="secao-optativas">
+      <div class="opt-cabeca">
+        <h3>Optativas</h3>
+        <span>${minimo ? `você precisa de <b>${minimo} h</b> · ` : ''}${plural(lista.length, 'opção', 'opções')}</span>
+      </div>
+      <p class="opt-nota">Algumas optativas têm pré-requisito. Confira no SIGAA antes de se matricular.</p>
+      ${grupos.map(([titulo, itens]) => `
+        <h4 class="opt-grupo">${titulo}</h4>
+        <ul class="opt-lista">${itens.map((o) => `
+          <li class="opt-item">
+            <code class="chip-cod">${esc(o.codigo)}</code>
+            <span class="opt-nome">${esc(bonito(o.nome))}</span>
+            <span class="opt-horas">${horasDe(o.creditos)} h</span>
+          </li>`).join('')}</ul>`).join('')}
+    </section>`;
 }
 
 // caminho com cantos arredondados passando pelos pontos dados
@@ -1598,10 +1670,14 @@ function desenharResposta(tipo, dados, ctx) {
       return `<p class="resumo"><strong>${plural(dados.length, 'disciplina encontrada', 'disciplinas encontradas')}</strong> ${gradeNaFrase(ctx.estrutura)}.</p>
         <div class="grade-cartoes">${dados.map((l) => {
           const grades = l.estruturas.split(', ');
+          const optativaEm = new Set((l.optativa_em || '').split(', ').filter(Boolean));
+          // obrigatória em alguma grade: o clique mostra os pré-requisitos dela
+          const obrigatoriaEm = grades.filter((g) => !optativaEm.has(g) && (!ctx.estrutura || g === ctx.estrutura));
           return cartao({
-            codigo: l.codigo, nome: l.nome, estrutura: ctx.estrutura || grades[grades.length - 1],
+            codigo: l.codigo, nome: l.nome, estrutura: obrigatoriaEm[obrigatoriaEm.length - 1] || '',
+            clicavel: obrigatoriaEm.length > 0,
             extra: `<span class="disc-rodape"><span class="disc-cred">${plural(l.creditos, 'crédito', 'créditos')}</span>
-              ${grades.map((g) => `<span class="selo selo-grade">${esc(nomeGrade(g))}</span>`).join('')}</span>`,
+              ${grades.map((g) => `<span class="selo selo-grade">${esc(nomeGrade(g))}${optativaEm.has(g) ? ' · optativa' : ''}</span>`).join('')}</span>`,
           });
         }).join('')}</div>`;
     }

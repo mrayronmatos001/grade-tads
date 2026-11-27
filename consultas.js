@@ -71,6 +71,27 @@ WHERE ementa IS NOT NULL`,
     normalizar: (linhas) => Object.fromEntries(linhas.map((l) => [l.codigo, l.ementa])),
   },
 
+  // optativas de cada grade (usada por /api/opcoes, não aparece como pergunta)
+  optativas: {
+    interna: true,
+    sql: () => ({
+      texto: `
+SELECT cde.estrutura_codigo AS estrutura, c.codigo, c.nome, c.creditos
+FROM componente_da_estrutura_curricular cde
+JOIN componente c ON c.codigo = cde.componente_codigo
+WHERE cde.natureza = 'OPTATIVA'
+ORDER BY c.nome`,
+      valores: [],
+    }),
+    normalizar: (linhas) => {
+      const porGrade = {};
+      for (const l of linhas) {
+        (porGrade[l.estrutura] ||= []).push({ codigo: l.codigo, nome: l.nome, creditos: Number(l.creditos) });
+      }
+      return porGrade;
+    },
+  },
+
   buscar: {
     titulo: "Buscar disciplinas",
     descricao: "Procura por parte do código ou do nome, em uma grade ou em todas.",
@@ -114,7 +135,8 @@ WHERE ementa IS NOT NULL`,
     sql: (p) => ({
       texto: `
 SELECT c.codigo, c.nome, c.creditos,
-       array_agg(cde.estrutura_codigo ORDER BY cde.estrutura_codigo) AS estruturas
+       array_agg(cde.estrutura_codigo ORDER BY cde.estrutura_codigo) AS estruturas,
+       array_remove(array_agg(CASE WHEN cde.natureza = 'OPTATIVA' THEN cde.estrutura_codigo END), NULL) AS optativa_em
 FROM componente c
 JOIN componente_da_estrutura_curricular cde ON cde.componente_codigo = c.codigo
 WHERE ($1::text IS NULL OR cde.estrutura_codigo = $1)
@@ -131,6 +153,7 @@ ORDER BY c.codigo`,
           nome: l.nome,
           creditos: Number(l.creditos),
           estruturas: [...l.estruturas].sort().join(', '),
+          optativa_em: [...(l.optativa_em || [])].sort().join(', '),
         }))
         .sort(porCodigo),
   },
@@ -293,6 +316,7 @@ SELECT c.codigo, c.nome, c.creditos, cde.periodo,
 FROM componente_da_estrutura_curricular cde
 JOIN componente c ON c.codigo = cde.componente_codigo
 WHERE cde.estrutura_codigo = $1
+  AND cde.natureza = 'OBRIGATORIA'
   AND ( $2::text = 'todos'
      OR ($2::text = 'com') = EXISTS (SELECT 1 FROM grupo_de_prerequisito g
                                      WHERE g.estrutura_codigo  = cde.estrutura_codigo
@@ -347,6 +371,7 @@ SELECT c.codigo, c.nome, c.creditos
 FROM componente_da_estrutura_curricular cde
 JOIN componente c ON c.codigo = cde.componente_codigo
 WHERE cde.estrutura_codigo = $1
+  AND cde.natureza = 'OBRIGATORIA'
   AND NOT (cde.componente_codigo = ANY($2::text[]))
   -- não existe grupo em que nenhuma alternativa foi concluída
   AND NOT EXISTS (
