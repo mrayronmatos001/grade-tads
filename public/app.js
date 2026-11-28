@@ -98,7 +98,7 @@ function prepararTemas() {
 // ---------------------------------------------------------------------
 const CATALOGO = [
   {
-    sigla: 'UFRN', nome: 'Universidade Federal do Rio Grande do Norte',
+    sigla: 'UFRN', nome: 'Universidade Federal do Rio Grande do Norte', logo: 'img/ufrn-selo.png',
     cursos: [
       { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba' },
     ],
@@ -122,7 +122,11 @@ function abrirInicio(primeiraVez = false) {
     tela.innerHTML = `
       <div class="inicio-caixa">
         <div class="inicio-topo">
-          <img src="img/logo-tads.png" alt="" width="40" height="40">
+          <span class="inicio-marca" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/>
+              <rect x="3.5" y="15.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="15.5" width="7" height="5" rx="1.5"/>
+              <path d="M7 8.5v7M7 12h7.5a2.5 2.5 0 0 1 2.5 2.5v1"/></svg>
+          </span>
           <strong>Grade curricular</strong>
           <button type="button" class="inicio-fechar" aria-label="Fechar">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
@@ -165,7 +169,9 @@ function passoUniversidades() {
     <div class="inicio-opcoes">
       ${CATALOGO.map((u, i) => `
         <button type="button" class="inicio-opcao" data-universidade="${i}">
-          <span class="inicio-sigla">${esc(u.sigla)}</span>
+          ${u.logo
+            ? `<img class="inicio-logo" src="${esc(u.logo)}" alt="${esc(u.sigla)}" width="92" height="46">`
+            : `<span class="inicio-sigla">${esc(u.sigla)}</span>`}
           <span class="inicio-texto"><b>${esc(u.nome)}</b><small>${plural(u.cursos.length, 'curso', 'cursos')}</small></span>
           <svg class="inicio-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
         </button>`).join('')}

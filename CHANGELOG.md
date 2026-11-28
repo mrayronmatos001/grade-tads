@@ -1,5 +1,10 @@
 # Histórico de versões
 
+## 2.12.1
+- Tela inicial: o logotipo do TADS no topo deu lugar a um símbolo genérico de
+  grade curricular (cartões ligados, como no mapa), e o cartão da UFRN passou
+  a mostrar o logotipo da universidade (`public/img/ufrn-selo.png`).
+
 ## 2.12.0
 - Tela inicial: na primeira visita, o site mostra as universidades
   cadastradas (por enquanto, UFRN) e depois os cursos (TADS). A escolha fica

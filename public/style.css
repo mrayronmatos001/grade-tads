@@ -1619,7 +1619,13 @@ body.com-inicio { overflow: hidden; }
 }
 @keyframes entrar-inicio { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
 .inicio-topo { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-.inicio-topo img { border-radius: 10px; }
+.inicio-marca {
+  width: 40px; height: 40px; flex: none; display: grid; place-items: center;
+  border-radius: 12px; background: var(--baoba);
+}
+.inicio-marca svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.inicio-marca rect { fill: color-mix(in srgb, #fff 22%, transparent); }
+.inicio-logo { flex: none; width: 92px; height: 46px; border-radius: 12px; object-fit: cover; }
 .inicio-topo strong { font-family: var(--display); font-size: 1rem; color: var(--tinta); }
 .inicio-fechar {
   margin-left: auto; width: 36px; height: 36px; display: grid; place-items: center;
@@ -1674,3 +1680,5 @@ body.com-inicio { overflow: hidden; }
   .inicio-caixa { margin: 0; width: 100%; min-height: 100%; border: 0; border-radius: 0; box-shadow: none; padding: 18px 18px 32px; }
   .inicio-form .sug-linha { grid-template-columns: 1fr; }
 }
+/* com logotipos na lista, o "+" fica da mesma largura para os textos alinharem */
+.inicio-opcoes:has(.inicio-logo) .inicio-sigla { min-width: 92px; }
