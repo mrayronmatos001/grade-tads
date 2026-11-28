@@ -11,7 +11,12 @@ const admin = require('./admin');
 
 const app = express();
 app.use(express.json({ limit: '20kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  // o service worker precisa ser conferido a cada visita, para as versões novas chegarem
+  setHeaders: (res, arquivo) => {
+    if (arquivo.endsWith('sw.js')) res.setHeader('Cache-Control', 'no-cache');
+  },
+}));
 
 // Lista de perguntas disponíveis (a tela monta a frase a partir daqui)
 app.get('/api/consultas', (req, res) => {

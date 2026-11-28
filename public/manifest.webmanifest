@@ -1,0 +1,37 @@
+{
+  "id": "/",
+  "name": "Grades",
+  "short_name": "Grades",
+  "description": "Grade curricular, pré-requisitos e o que você pode cursar.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f8f5",
+  "theme_color": "#457e51",
+  "categories": [
+    "education"
+  ],
+  "icons": [
+    {
+      "src": "/img/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/img/icone-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,5 +1,21 @@
 # Histórico de versões
 
+## 2.13.1
+- PWA: o app instalado se chama "Grades" e usa o símbolo da tela inicial
+  (cartões ligados, fundo verde) como ícone, também no iPhone.
+
+## 2.13.0
+- PWA: o site pode ser instalado como app (Android, Chrome e Edge no
+  computador, e iPhone pelo "Adicionar à Tela de Início"). Tem manifesto
+  (`public/manifest.webmanifest`), ícones (`public/img/icone-*.png`) e
+  service worker (`public/sw.js`). Sem internet, o app abre com os últimos
+  dados vistos. A área /admin e os envios nunca passam pelo cache.
+- Botão "Instalar o app" no rodapé, quando o navegador permite.
+- Optativas: a nota do topo saiu; ficou só um rodapé curto,
+  "* pré-requisito: confira no SIGAA", para as criadas depois do PPC.
+- Ao lançar uma versão, troque também `VERSAO` em `public/sw.js` (junto com
+  o `?v=` dos arquivos), senão o app instalado continua com a versão antiga.
+
 ## 2.12.2
 - Tela inicial: o cartão do TADS (depois de escolher a UFRN) mostra o
   logotipo do curso no lugar da sigla.

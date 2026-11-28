@@ -1688,3 +1688,12 @@ body.com-inicio { overflow: hidden; }
   background: #fff; border: 1px solid var(--linha); border-radius: 12px; overflow: hidden;
 }
 .inicio-logo-curso img { width: 42px; height: 42px; object-fit: contain; }
+.opt-rodape { margin: 12px 0 0; font-size: 0.78rem; color: var(--tinta-suave); }
+.opt-corpo > .opt-grupo:first-child { margin-top: 4px; }
+.instalar-app {
+  margin-left: 12px; padding: 4px 12px;
+  font: inherit; font-size: 0.85rem; font-weight: 700;
+  color: var(--baoba-texto, var(--baoba)); background: transparent;
+  border: 1.5px solid var(--menta); border-radius: 999px; cursor: pointer;
+}
+.instalar-app[hidden] { display: none; }

@@ -94,5 +94,6 @@ banco diretamente com o usuário do PostgreSQL.
 | `sql/atualizacao_solicitacoes.sql` | Atualização de um banco existente: aceita pedidos de novo curso (tipo NOVO_CURSO) |
 | `public/index.html`, `app.js`, `style.css` | A página |
 | `public/complementares.js` | Tabela das atividades complementares (resolução do colegiado). Para atualizar, edite este arquivo |
+| `public/sw.js`, `public/manifest.webmanifest` | PWA: service worker (cache e modo offline) e manifesto do app. A constante `VERSAO` do `sw.js` deve acompanhar o `?v=` dos arquivos |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |
 | `.github/workflows/manter-ativo.yml` | Acesso periódico que evita a pausa do Supabase gratuito |

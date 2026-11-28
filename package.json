@@ -1,6 +1,6 @@
 {
   "name": "grade-tads",
-  "version": "2.12.2",
+  "version": "2.13.1",
   "private": true,
   "description": "Consultas à grade curricular do TADS/UFRN em PostgreSQL",
   "author": "Ayron Matos",

@@ -1310,7 +1310,6 @@ function htmlOptativas(estrutura) {
         <svg class="comp-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>
       </summary>
       <div class="opt-corpo">
-        <p class="opt-nota">Pré-requisitos conforme o PPC do curso.${semInformacao ? ' <span class="opt-asterisco">*</span> Criada depois do PPC: confira o pré-requisito no SIGAA.' : ''}</p>
         ${grupos.map(([titulo, itens]) => `
           <h4 class="opt-grupo">${titulo}</h4>
           <ul class="opt-lista">${itens.map((o) => {
@@ -1318,6 +1317,7 @@ function htmlOptativas(estrutura) {
             const asterisco = OPTATIVAS_FORA_DO_PPC.has(o.codigo) ? ' <span class="opt-asterisco" title="Criada depois do PPC: confira o pré-requisito no SIGAA">*</span>' : '';
             return `<li><span class="opt-nome">${esc(bonito(o.nome))}${asterisco}${req ? `<small class="opt-req">requer ${esc(req)}</small>` : ''}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`;
           }).join('')}</ul>`).join('')}
+        ${semInformacao ? '<p class="opt-rodape"><span class="opt-asterisco">*</span> pré-requisito: confira no SIGAA</p>' : ''}
       </div>
     </details>`;
 }
@@ -1947,3 +1947,28 @@ async function verPrerequisitos(codigo, estrutura) {
 }
 
 iniciar();
+
+// ---------------------------------------------------------------------
+// PWA: registra o service worker e mostra "Instalar o app" quando o
+// navegador permite (Chrome, Edge, Android). No iPhone: Compartilhar ->
+// Adicionar à Tela de Início.
+// ---------------------------------------------------------------------
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => { /* sem PWA: o site funciona igual */ });
+  });
+}
+let pedidoInstalacao = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pedidoInstalacao = e;
+  $('#instalarApp').hidden = false;
+});
+$('#instalarApp').addEventListener('click', async () => {
+  if (!pedidoInstalacao) return;
+  pedidoInstalacao.prompt();
+  await pedidoInstalacao.userChoice.catch(() => null);
+  pedidoInstalacao = null;
+  $('#instalarApp').hidden = true;
+});
+window.addEventListener('appinstalled', () => { $('#instalarApp').hidden = true; });
