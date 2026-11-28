@@ -17,6 +17,8 @@ Instaladas pelo npm a partir do `package.json`:
 | `bytes@3.1.2` | MIT |
 | `call-bind-apply-helpers@1.0.2` | MIT |
 | `call-bound@1.0.4` | MIT |
+| `compressible@2.0.18` | MIT |
+| `compression@1.7.5` | MIT |
 | `content-disposition@0.5.4` | MIT |
 | `content-type@1.0.5` | MIT |
 | `cookie-signature@1.0.7` | MIT |
@@ -56,8 +58,10 @@ Instaladas pelo npm a partir do `package.json`:
 | `ms@2.0.0` | MIT |
 | `ms@2.1.3` | MIT |
 | `negotiator@0.6.3` | MIT |
+| `negotiator@0.6.4` | MIT |
 | `object-inspect@1.13.4` | MIT |
 | `on-finished@2.4.2` | MIT |
+| `on-headers@1.0.2` | MIT |
 | `parseurl@1.3.3` | MIT |
 | `path-to-regexp@0.1.13` | MIT |
 | `pg-cloudflare@1.4.1` | MIT |

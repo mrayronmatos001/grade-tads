@@ -3,6 +3,7 @@
    (baobá verde, arcos menta, TADS ciano, UFRN azul e índigo)
    ===================================================================== */
 :root {
+  --baoba-texto: #36673f;
   /* paleta do logotipo */
   --baoba: #457e51;
   --menta: #42bf84;
@@ -567,7 +568,7 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--menta) 22%, transparent);
 }
 .no-alvo .no-nome { font-family: var(--display); font-size: 1.02rem; }
-.no-alvo .chip-cod { color: #fff; background: rgba(255, 255, 255, 0.18); }
+.no-alvo .chip-cod { color: #fff; background: rgba(0, 0, 0, 0.24); }
 
 .no-grupo {
   display: flex; flex-direction: column; gap: 6px;
@@ -669,7 +670,7 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--ciano) 22%, transparent);
 }
 .no-fonte .no-nome { font-family: var(--display); font-size: 1.02rem; }
-.no-fonte .chip-cod { color: #fff; background: rgba(255, 255, 255, 0.2); }
+.no-fonte .chip-cod { color: #fff; background: rgba(0, 0, 0, 0.24); }
 .fluxo-azul button.no:hover { border-color: var(--ciano); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ciano) 20%, transparent); }
 .no .selo-alt { font-size: 0.7rem; padding: 1px 8px; }
 .bloco-grade h3 small { font-family: var(--texto); font-weight: 500; font-size: 0.82rem; margin-left: 8px; }
@@ -881,7 +882,7 @@ button.no:hover { border-color: var(--menta); box-shadow: 0 0 0 3px color-mix(in
 @media (prefers-reduced-motion: reduce) { .aurora span { animation: none; } }
 
 /* cargas horárias da grade no cabeçalho */
-.cargas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.cargas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; min-height: 26px; }
 .carga {
   display: inline-flex; align-items: baseline; gap: 5px;
   font-size: 0.78rem; color: var(--tinta-suave);
@@ -1697,3 +1698,21 @@ body.com-inicio { overflow: hidden; }
   border: 1.5px solid var(--menta); border-radius: 999px; cursor: pointer;
 }
 .instalar-app[hidden] { display: none; }
+
+/* =====================================================================
+   Desempenho
+   ===================================================================== */
+/* reserva o espaço do que o JavaScript preenche, para a página não pular
+   ao carregar: o rodapé começava no meio da tela e era empurrado */
+.pagina { min-height: 100vh; min-height: 100dvh; }
+#tipos:empty { min-height: 40px; }
+#frase:empty { min-height: 2lh; }
+@media (max-width: 720px) {
+  #tipos { min-height: calc(67px + env(safe-area-inset-bottom)); }
+  #frase:empty { min-height: 3lh; }
+  /* no celular a tela inicial já é opaca: o desfoque só gastaria processamento */
+  .inicio { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+/* com a tela inicial aberta, as animações de trás ficam paradas */
+body.com-inicio .aurora span,
+body.com-inicio .pagina * { animation-play-state: paused !important; }

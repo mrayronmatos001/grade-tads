@@ -7,7 +7,7 @@
 // - Área /admin e envios (sugestões, pedidos): nunca passam pelo cache.
 // A VERSAO é trocada a cada versão do site; ao mudar, o cache antigo é apagado.
 // =====================================================================
-const VERSAO = '2.13.2';
+const VERSAO = '2.14.0';
 const CACHE = `grade-tads-${VERSAO}`;
 const ESSENCIAIS = [
   '/',
@@ -15,7 +15,7 @@ const ESSENCIAIS = [
   `/app.js?v=${VERSAO}`,
   `/complementares.js?v=${VERSAO}`,
   '/manifest.webmanifest',
-  '/img/logo-tads.png',
+  '/img/logo-tads-128.png',
   '/img/ufrn-selo.png',
   '/img/favicon-32.png',
   '/img/icone-192.png',

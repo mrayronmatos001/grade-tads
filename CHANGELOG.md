@@ -1,5 +1,26 @@
 # Histórico de versões
 
+## 2.14.0 — otimização
+Lighthouse no celular: Desempenho 81 → 99, Acessibilidade 96 → 100,
+SEO 91 → 100. CLS (página pulando ao carregar) 0,279 → 0; peso da primeira
+visita 291 KB → ~80 KB.
+- A página não pula mais ao carregar: o espaço dos contadores do cabeçalho,
+  da barra de abas e da frase fica reservado, e o conteúdo ocupa ao menos a
+  altura da tela (o rodapé começava no meio e era empurrado).
+- Logotipo de 67 KB trocado por uma versão de 128 px (4 KB); favicons
+  comprimidos (20 KB → 4 KB); removido o `favicon-180.png`, que não era usado.
+- Servidor: respostas compactadas (`compression`; o JSON das opções cai de
+  32 KB para 9 KB), as consultas de `/api/opcoes` vão juntas ao banco, e as
+  leituras ficam 5 minutos em memória. `/api/opcoes` também fica 5 minutos
+  no cache da Vercel. Depois de rodar um script no banco, as mudanças podem
+  levar até 5 minutos para aparecer (ou aparecem na hora com um novo deploy).
+- Com a tela inicial aberta, as animações de trás ficam paradas, e no
+  celular ela não usa mais desfoque (já era opaca).
+- Acessibilidade: contraste dos códigos das disciplinas e do verde de texto
+  no tema claro; o nome lido pelo leitor de tela nos seletores da frase
+  inclui o valor escolhido.
+- SEO: descrição da página (meta description).
+
 ## 2.13.2
 - Optativas: o rodapé diz o motivo do asterisco: "* criada depois do PPC:
   confira o pré-requisito no SIGAA".

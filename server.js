@@ -3,6 +3,7 @@
 // Roda localmente com "npm start" e na Vercel como função (export do app).
 // =====================================================================
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 const config = require('./config');
 const consultas = require('./consultas');
@@ -11,6 +12,26 @@ const admin = require('./admin');
 
 const app = express();
 app.use(express.json({ limit: '20kb' }));
+// compacta as respostas (o JSON das opções cai de ~32 KB para ~6 KB)
+app.use(compression());
+
+// ---------------------------------------------------------------------
+// Memória curta para as leituras: os dados da grade quase nunca mudam, e
+// cada ida ao banco (Supabase) custa uma viagem de rede. Guarda por 5 min,
+// por instância do servidor. Depois de rodar um script no banco, as
+// mudanças aparecem em até 5 minutos (ou na hora, com um novo deploy).
+// ---------------------------------------------------------------------
+const MEMORIA_MS = 5 * 60 * 1000;
+const memoria = new Map();
+async function lembrar(chave, calcular) {
+  const salvo = memoria.get(chave);
+  if (salvo && Date.now() - salvo.quando < MEMORIA_MS) return salvo.valor;
+  const valor = await calcular();
+  if (memoria.size > 300) memoria.delete(memoria.keys().next().value);   // limite simples
+  memoria.set(chave, { valor, quando: Date.now() });
+  return valor;
+}
+
 app.use(express.static(path.join(__dirname, 'public'), {
   // o service worker precisa ser conferido a cada visita, para as versões novas chegarem
   setHeaders: (res, arquivo) => {
@@ -20,6 +41,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
 
 // Lista de perguntas disponíveis (a tela monta a frase a partir daqui)
 app.get('/api/consultas', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300, s-maxage=3600');
   const lista = Object.entries(consultas)
     .filter(([, c]) => !c.interna)
     .map(([id, c]) => ({ id, titulo: c.titulo, descricao: c.descricao, campos: c.campos, colunas: c.colunas }));
@@ -33,24 +55,33 @@ app.get('/api/status', async (req, res) => {
 });
 
 // Grades, disciplinas (com período e pré-requisitos) e cargas horárias
+async function montarOpcoes() {
+  const detalhes = {};
+  consultas.estruturas.normalizar(await executar(consultas.estruturas.sql()))
+    .forEach((e) => (detalhes[e.codigo] = e));
+  const estruturas = Object.keys(detalhes).sort();
+  // as consultas seguintes não dependem umas das outras: vão juntas ao banco
+  const [grades, ementas, optativas] = await Promise.all([
+    Promise.all(estruturas.map((estrutura) => executar(consultas.grade.sql({ estrutura, filtro: 'todos' })))),
+    // ementas: se a coluna ainda não existir no banco, a página funciona sem elas
+    executar(consultas.ementas.sql()).then((l) => consultas.ementas.normalizar(l)).catch(() => ({})),
+    executar(consultas.optativas.sql()).then((l) => consultas.optativas.normalizar(l)),
+  ]);
+  const componentes = {};
+  estruturas.forEach((estrutura, i) => {
+    componentes[estrutura] = consultas.grade.normalizar(grades[i]).map((l) => ({
+      codigo: l.codigo, nome: l.nome, creditos: l.creditos, periodo: l.periodo, prerequisitos: l.prerequisitos,
+    }));
+  });
+  return { estruturas, componentes, optativas, detalhes, ementas };
+}
+
 app.get('/api/opcoes', async (req, res) => {
   try {
-    const detalhes = {};
-    consultas.estruturas.normalizar(await executar(consultas.estruturas.sql()))
-      .forEach((e) => (detalhes[e.codigo] = e));
-    const estruturas = Object.keys(detalhes).sort();
-    const componentes = {};
-    for (const estrutura of estruturas) {
-      const linhas = consultas.grade.normalizar(await executar(consultas.grade.sql({ estrutura, filtro: 'todos' })));
-      componentes[estrutura] = linhas.map((l) => ({
-        codigo: l.codigo, nome: l.nome, creditos: l.creditos, periodo: l.periodo, prerequisitos: l.prerequisitos,
-      }));
-    }
-    // ementas: se a coluna ainda não existir no banco, a página funciona sem elas
-    let ementas = {};
-    try { ementas = consultas.ementas.normalizar(await executar(consultas.ementas.sql())); } catch { /* sem ementas */ }
-    const optativas = consultas.optativas.normalizar(await executar(consultas.optativas.sql()));
-    res.json({ estruturas, componentes, optativas, detalhes, ementas });
+    const opcoes = await lembrar('opcoes', montarOpcoes);
+    // a Vercel guarda por 5 min na borda e serve a cópia enquanto atualiza
+    res.set('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400');
+    res.json(opcoes);
   } catch (e) {
     res.status(503).json({ erro: 'Não foi possível acessar o banco de dados. Confira o arquivo .env.' });
   }
@@ -82,7 +113,7 @@ app.post('/api/consulta', async (req, res) => {
   catch (e) { return res.status(400).json({ erro: e.message }); }
 
   try {
-    const dados = consulta.normalizar(await executar(consulta.sql(p)));
+    const dados = await lembrar(`${tipo}:${JSON.stringify(p)}`, async () => consulta.normalizar(await executar(consulta.sql(p))));
     res.json({ dados });
   } catch (e) {
     res.status(500).json({ erro: 'A consulta falhou no banco de dados.' });

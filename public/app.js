@@ -100,7 +100,7 @@ const CATALOGO = [
   {
     sigla: 'UFRN', nome: 'Universidade Federal do Rio Grande do Norte', logo: 'img/ufrn-selo.png',
     cursos: [
-      { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba', logo: 'img/logo-tads.png' },
+      { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba', logo: 'img/logo-tads-128.png' },
     ],
   },
 ];
@@ -589,7 +589,7 @@ function htmlLacuna(campo) {
   if (['estrutura', 'componente', 'filtro'].includes(campo.tipo)) {
     const rotulos = { estrutura: 'Grade', componente: 'Disciplina', filtro: 'Quais disciplinas mostrar' };
     return `<span class="lacuna"><button type="button" class="escolha" data-nome="${campo.nome}"
-        aria-haspopup="listbox" aria-expanded="false" aria-label="${rotulos[campo.tipo]}">
+        aria-haspopup="listbox" aria-expanded="false" data-rotulo="${rotulos[campo.tipo]}" aria-label="${rotulos[campo.tipo]}">
         <span class="escolha-texto"></span></button><input type="hidden" name="${campo.nome}"></span>`;
   }
   return `<span class="lacuna texto"><input type="text" name="${campo.nome}" placeholder="${esc(campo.exemplo || '...')}"
@@ -640,6 +640,7 @@ function aplicarEscolha(nome, valor, avisar = true) {
   input.value = valor;
   input.dataset.definido = '1';
   botao.querySelector('.escolha-texto').textContent = opcao ? opcao.naFrase : '';
+  botao.setAttribute('aria-label', opcao ? `${botao.dataset.rotulo}: ${opcao.naFrase}` : botao.dataset.rotulo);
   if (avisar) input.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
