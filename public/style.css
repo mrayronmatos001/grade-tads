@@ -1682,3 +1682,9 @@ body.com-inicio { overflow: hidden; }
 }
 /* com logotipos na lista, o "+" fica da mesma largura para os textos alinharem */
 .inicio-opcoes:has(.inicio-logo) .inicio-sigla { min-width: 92px; }
+/* logotipo do curso: mesma caixa do selo de texto (58 x 46), para alinhar com o "+" */
+.inicio-logo-curso {
+  flex: none; width: 58px; height: 46px; display: grid; place-items: center;
+  background: #fff; border: 1px solid var(--linha); border-radius: 12px; overflow: hidden;
+}
+.inicio-logo-curso img { width: 42px; height: 42px; object-fit: contain; }

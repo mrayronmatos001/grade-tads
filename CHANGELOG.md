@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 2.12.2
+- Tela inicial: o cartão do TADS (depois de escolher a UFRN) mostra o
+  logotipo do curso no lugar da sigla.
+
 ## 2.12.1
 - Tela inicial: o logotipo do TADS no topo deu lugar a um símbolo genérico de
   grade curricular (cartões ligados, como no mapa), e o cartão da UFRN passou

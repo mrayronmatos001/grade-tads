@@ -100,7 +100,7 @@ const CATALOGO = [
   {
     sigla: 'UFRN', nome: 'Universidade Federal do Rio Grande do Norte', logo: 'img/ufrn-selo.png',
     cursos: [
-      { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba' },
+      { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba', logo: 'img/logo-tads.png' },
     ],
   },
 ];
@@ -194,7 +194,9 @@ function passoCursos(uni) {
     <div class="inicio-opcoes">
       ${uni.cursos.map((c) => `
         <button type="button" class="inicio-opcao" data-curso="${c.id}">
-          <span class="inicio-sigla">${esc(c.sigla)}</span>
+          ${c.logo
+            ? `<span class="inicio-logo-curso"><img src="${esc(c.logo)}" alt="${esc(c.sigla)}" width="46" height="46"></span>`
+            : `<span class="inicio-sigla">${esc(c.sigla)}</span>`}
           <span class="inicio-texto"><b>${esc(c.nome)}</b><small>${esc(c.unidade)}</small></span>
           <svg class="inicio-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
         </button>`).join('')}
