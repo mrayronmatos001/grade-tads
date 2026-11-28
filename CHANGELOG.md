@@ -1,5 +1,11 @@
 # Histórico de versões
 
+## 2.11.1
+- Celular, aba de pré-requisitos: os pré-requisitos ficam em cima e a
+  disciplina escolhida (verde) embaixo, na mesma ordem do desktop.
+- Celular, grade completa: o cabeçalho de cada período tinha fundo e borda
+  por cima dos fios e cortava o fluxo na passagem de um período para outro.
+
 ## 2.11.0
 - Pré-requisitos das optativas, conforme a tabela de optativas do PPC
   (estrutura 03): 10 optativas têm pré-requisito e aparecem com "requer ..."
