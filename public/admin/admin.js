@@ -4,7 +4,7 @@
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-const TIPOS = { SUGESTAO: 'Sugestão', ERRO_DADOS: 'Erro nos dados', OUTRO: 'Outro assunto' };
+const TIPOS = { SUGESTAO: 'Sugestão', ERRO_DADOS: 'Erro nos dados', OUTRO: 'Outro assunto', NOVO_CURSO: 'Novo curso' };
 const STATUS = [
   ['NOVA', 'Novas'], ['LIDA', 'Lidas'], ['RESOLVIDA', 'Resolvidas'], ['DESCARTADA', 'Descartadas'], ['', 'Todas'],
 ];

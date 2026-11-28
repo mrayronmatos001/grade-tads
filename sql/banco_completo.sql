@@ -575,7 +575,7 @@ CREATE TABLE IF NOT EXISTS sugestao (
     criado_em  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pk_sugestao PRIMARY KEY (id),
-    CONSTRAINT ck_sugestao_tipo     CHECK (tipo IN ('SUGESTAO', 'ERRO_DADOS', 'OUTRO')),
+    CONSTRAINT ck_sugestao_tipo     CHECK (tipo IN ('SUGESTAO', 'ERRO_DADOS', 'OUTRO', 'NOVO_CURSO')),
     CONSTRAINT ck_sugestao_status   CHECK (status IN ('NOVA', 'LIDA', 'RESOLVIDA', 'DESCARTADA')),
     CONSTRAINT ck_sugestao_mensagem CHECK (char_length(mensagem) BETWEEN 10 AND 2000)
 );

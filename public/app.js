@@ -92,6 +92,197 @@ function prepararTemas() {
   });
 }
 
+// ---------------------------------------------------------------------
+// Tela inicial: universidade -> curso. Aparece na primeira visita e ao
+// clicar no logotipo ou em "trocar". O "+" pede a página de outro curso.
+// ---------------------------------------------------------------------
+const CATALOGO = [
+  {
+    sigla: 'UFRN', nome: 'Universidade Federal do Rio Grande do Norte',
+    cursos: [
+      { id: 'ufrn-tads', sigla: 'TADS', nome: 'Análise e Desenvolvimento de Sistemas', unidade: 'Escola Agrícola de Jundiaí · Macaíba' },
+    ],
+  },
+];
+const CHAVE_CURSO = 'grade_curso';
+
+function cursoEscolhido() {
+  try { return localStorage.getItem(CHAVE_CURSO); } catch { return null; }
+}
+
+function abrirInicio(primeiraVez = false) {
+  let tela = $('#inicio');
+  if (!tela) {
+    tela = document.createElement('div');
+    tela.id = 'inicio';
+    tela.className = 'inicio';
+    tela.setAttribute('role', 'dialog');
+    tela.setAttribute('aria-modal', 'true');
+    tela.setAttribute('aria-labelledby', 'inicioTitulo');
+    tela.innerHTML = `
+      <div class="inicio-caixa">
+        <div class="inicio-topo">
+          <img src="img/logo-tads.png" alt="" width="40" height="40">
+          <strong>Grade curricular</strong>
+          <button type="button" class="inicio-fechar" aria-label="Fechar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        </div>
+        <div class="inicio-passo" id="inicioPasso"></div>
+      </div>`;
+    document.body.appendChild(tela);
+    tela.querySelector('.inicio-fechar').addEventListener('click', fecharInicio);
+    tela.addEventListener('keydown', (e) => { if (e.key === 'Escape' && cursoEscolhido()) fecharInicio(); });
+  }
+  // na primeira visita é preciso escolher um curso: sem botão de fechar
+  tela.querySelector('.inicio-fechar').hidden = primeiraVez || !cursoEscolhido();
+  tela.hidden = false;
+  document.body.classList.add('com-inicio');
+  passoUniversidades();
+}
+
+function fecharInicio() {
+  const tela = $('#inicio');
+  if (!tela) return;
+  tela.hidden = true;
+  document.body.classList.remove('com-inicio');
+}
+
+function mostrarPasso(html, aoMontar) {
+  const passo = $('#inicioPasso');
+  passo.innerHTML = html;
+  aoMontar?.(passo);
+  passo.querySelector('h1')?.focus();
+  $('#inicio').scrollTop = 0;
+}
+
+const htmlVoltar = (rotulo) => `<button type="button" class="inicio-voltar" data-voltar>
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>${rotulo}</button>`;
+
+function passoUniversidades() {
+  mostrarPasso(`
+    <h1 id="inicioTitulo" tabindex="-1">Escolha sua universidade</h1>
+    <p class="inicio-sub">Veja a grade, os pré-requisitos e o que você já pode cursar.</p>
+    <div class="inicio-opcoes">
+      ${CATALOGO.map((u, i) => `
+        <button type="button" class="inicio-opcao" data-universidade="${i}">
+          <span class="inicio-sigla">${esc(u.sigla)}</span>
+          <span class="inicio-texto"><b>${esc(u.nome)}</b><small>${plural(u.cursos.length, 'curso', 'cursos')}</small></span>
+          <svg class="inicio-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+        </button>`).join('')}
+      <button type="button" class="inicio-opcao inicio-novo" data-pedido>
+        <span class="inicio-sigla">+</span>
+        <span class="inicio-texto"><b>Outra universidade</b><small>Peça a grade do seu curso</small></span>
+      </button>
+    </div>`, (passo) => {
+    passo.querySelectorAll('[data-universidade]').forEach((b) =>
+      b.addEventListener('click', () => passoCursos(CATALOGO[b.dataset.universidade])));
+    passo.querySelector('[data-pedido]').addEventListener('click', () => passoPedido(null));
+  });
+}
+
+function passoCursos(uni) {
+  mostrarPasso(`
+    ${htmlVoltar('Universidades')}
+    <h1 id="inicioTitulo" tabindex="-1">Cursos da ${esc(uni.sigla)}</h1>
+    <p class="inicio-sub">${esc(uni.nome)}</p>
+    <div class="inicio-opcoes">
+      ${uni.cursos.map((c) => `
+        <button type="button" class="inicio-opcao" data-curso="${c.id}">
+          <span class="inicio-sigla">${esc(c.sigla)}</span>
+          <span class="inicio-texto"><b>${esc(c.nome)}</b><small>${esc(c.unidade)}</small></span>
+          <svg class="inicio-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+        </button>`).join('')}
+      <button type="button" class="inicio-opcao inicio-novo" data-pedido>
+        <span class="inicio-sigla">+</span>
+        <span class="inicio-texto"><b>Outro curso da ${esc(uni.sigla)}</b><small>Peça a grade do seu curso</small></span>
+      </button>
+    </div>`, (passo) => {
+    passo.querySelector('[data-voltar]').addEventListener('click', passoUniversidades);
+    passo.querySelectorAll('[data-curso]').forEach((b) => b.addEventListener('click', () => {
+      try { localStorage.setItem(CHAVE_CURSO, b.dataset.curso); } catch { /* sem armazenamento: só fecha */ }
+      fecharInicio();
+    }));
+    passo.querySelector('[data-pedido]').addEventListener('click', () => passoPedido(uni));
+  });
+}
+
+function passoPedido(uni) {
+  mostrarPasso(`
+    ${htmlVoltar(uni ? `Cursos da ${esc(uni.sigla)}` : 'Universidades')}
+    <h1 id="inicioTitulo" tabindex="-1">Pedir a grade de outro curso</h1>
+    <p class="inicio-sub">Para montar a página, precisamos do <b>PPC</b> (projeto pedagógico) e da <b>grade curricular com os pré-requisitos</b>.
+      Mande os links, se tiver. Se não tiver, deixe seu e-mail que combinamos o envio.</p>
+    <form class="inicio-form" novalidate>
+      <div class="sug-linha">
+        <label class="sug-campo"><span>Universidade</span>
+          <input name="universidade" maxlength="120" required value="${uni ? esc(uni.sigla) : ''}" autocomplete="organization"></label>
+        <label class="sug-campo"><span>Curso</span>
+          <input name="curso" maxlength="120" required placeholder="Ex.: Engenharia de Software"></label>
+      </div>
+      <label class="sug-campo"><span>Campus ou unidade <em>(opcional)</em></span>
+        <input name="campus" maxlength="120"></label>
+      <label class="sug-campo"><span>Link do PPC <em>(opcional)</em></span>
+        <input name="linkPpc" type="url" maxlength="400" placeholder="https://"></label>
+      <label class="sug-campo"><span>Link da grade com pré-requisitos <em>(opcional, ex.: estrutura curricular no SIGAA)</em></span>
+        <input name="linkGrade" type="url" maxlength="400" placeholder="https://"></label>
+      <div class="sug-linha">
+        <label class="sug-campo"><span>Seu nome <em>(opcional)</em></span>
+          <input name="nome" maxlength="80" autocomplete="name"></label>
+        <label class="sug-campo"><span>Seu e-mail</span>
+          <input name="email" type="email" maxlength="120" required autocomplete="email"></label>
+      </div>
+      <label class="sug-campo"><span>Observações <em>(opcional)</em></span>
+        <textarea name="observacao" rows="3" maxlength="800"></textarea></label>
+      <input class="sug-isca" type="text" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="sug-acoes">
+        <button type="submit" class="sug-enviar">Enviar pedido</button>
+        <p class="sug-status" role="status"></p>
+      </div>
+    </form>`, (passo) => {
+    passo.querySelector('[data-voltar]').addEventListener('click', () => (uni ? passoCursos(uni) : passoUniversidades()));
+    passo.querySelector('form').addEventListener('submit', enviarPedido);
+  });
+}
+
+async function enviarPedido(e) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const status = form.querySelector('.sug-status');
+  const botao = form.querySelector('.sug-enviar');
+  const dados = Object.fromEntries(new FormData(form));
+  status.className = 'sug-status';
+  const faltando = ['universidade', 'curso', 'email'].find((c) => !(dados[c] || '').trim());
+  if (faltando) {
+    status.classList.add('erro');
+    status.textContent = faltando === 'email' ? 'Informe seu e-mail, para combinarmos o envio do PPC e da grade.' : `Informe ${faltando === 'curso' ? 'o curso' : 'a universidade'}.`;
+    form.elements[faltando].focus();
+    return;
+  }
+  botao.disabled = true;
+  botao.textContent = 'Enviando…';
+  try {
+    const r = await fetch('/api/solicitacoes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados),
+    });
+    const corpo = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(corpo.erro || 'Não foi possível enviar agora.');
+    mostrarPasso(`
+      <h1 id="inicioTitulo" tabindex="-1">Pedido enviado. Obrigado!</h1>
+      <p class="inicio-sub">Vamos analisar e responder em <b>${esc(dados.email.trim())}</b> para combinar o PPC e a grade curricular.</p>
+      <div class="inicio-opcoes">
+        <button type="button" class="inicio-opcao" data-recomecar>
+          <span class="inicio-texto"><b>Voltar ao início</b><small>Ver as universidades e cursos disponíveis</small></span>
+          <svg class="inicio-seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+        </button>
+      </div>`, (passo) => passo.querySelector('[data-recomecar]').addEventListener('click', passoUniversidades));
+  } catch (erro) {
+    status.classList.add('erro');
+    status.textContent = erro.message;
+    botao.disabled = false;
+    botao.textContent = 'Enviar pedido';
+  }
+}
+
 async function iniciar() {
   prepararTemas();
   prepararDetalhe();
@@ -108,6 +299,13 @@ async function iniciar() {
   $('#tipos').innerHTML = consultas.map((c) => htmlAba(c.id, c.descricao, c.id === tipoAtual)).join('')
     + htmlAba('complementares', 'Atividades que contam como horas complementares', false)
     + htmlAba('sugestoes', 'Envie uma sugestão ou avise sobre um erro', false, 'tipo-sugestoes');
+  $('.marca').addEventListener('click', (e) => {
+    if (e.target.closest('[data-ir]')) return;   // os contadores têm atalho próprio
+    e.preventDefault();
+    abrirInicio();
+  });
+  if (!cursoEscolhido()) abrirInicio(true);
+
   $('#cargas').addEventListener('click', (e) => {
     const link = e.target.closest('[data-ir]');
     if (!link) return;
@@ -551,8 +749,8 @@ function atualizarCabecalho(estrutura) {
   if (!det) return;
   $('#nomeCurso').textContent = `${det.curso}, ${det.instituicao}`;
   $('#cargas').innerHTML = `
-    <span class="carga" title="Créditos das disciplinas obrigatórias da grade ${esc(nomeGrade(det.codigo))}">
-      <b>${det.creditos_obrigatorios} créditos</b> obrigatórios <i>${det.creditos_obrigatorios * 15} h</i></span>
+    <button type="button" class="carga carga-link" data-ir="grade" data-ancora="resultado" title="Ver a grade completa">
+      <b>${det.creditos_obrigatorios} créditos</b> obrigatórios <i>${det.creditos_obrigatorios * 15} h</i></button>
     <button type="button" class="carga carga-link" data-ir="grade" data-ancora="secao-optativas" title="Ver as optativas da grade">
       <b>${det.credito_optativas} créditos</b> optativos <i>${det.credito_optativas * 15} h</i></button>
     <button type="button" class="carga carga-link" data-ir="complementares" title="Ver o que conta como hora complementar">

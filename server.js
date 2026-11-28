@@ -133,6 +133,66 @@ app.post('/api/sugestoes', async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------------------
+// Pedido de página para outro curso ou universidade (tela inicial, "+").
+// Vai para a mesma tabela das sugestões, com o tipo NOVO_CURSO.
+// ---------------------------------------------------------------------
+app.post('/api/solicitacoes', async (req, res) => {
+  const corpo = req.body || {};
+  if (corpo.site) return res.status(201).json({ ok: true });   // robô
+
+  const texto = (v, max) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
+  const link = (v) => {
+    const t = texto(v, 400);
+    if (!t) return '';
+    try {
+      const url = new URL(t);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+    } catch { return null; }
+  };
+  const universidade = texto(corpo.universidade, 120);
+  const curso = texto(corpo.curso, 120);
+  const campus = texto(corpo.campus, 120);
+  const linkPpc = link(corpo.linkPpc);
+  const linkGrade = link(corpo.linkGrade);
+  const observacao = texto(corpo.observacao, 800);
+  const nome = texto(corpo.nome, 80) || null;
+  const email = texto(corpo.email, 120);
+
+  if (!universidade) return res.status(400).json({ erro: 'Informe a universidade.' });
+  if (!curso) return res.status(400).json({ erro: 'Informe o curso.' });
+  if (linkPpc === null || linkGrade === null) {
+    return res.status(400).json({ erro: 'Os links precisam começar com http:// ou https://.' });
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ erro: 'Informe um e-mail válido, para combinarmos o envio do PPC e da grade.' });
+  }
+  const ip = String(req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+  if (!podeEnviar(ip)) {
+    return res.status(429).json({ erro: 'Você enviou várias mensagens seguidas. Tente de novo em alguns minutos.' });
+  }
+
+  const mensagem = [
+    `Universidade: ${universidade}`,
+    `Curso: ${curso}`,
+    campus && `Campus ou unidade: ${campus}`,
+    `PPC: ${linkPpc || 'não informado'}`,
+    `Grade curricular com pré-requisitos: ${linkGrade || 'não informado'}`,
+    observacao && `Observações: ${observacao}`,
+  ].filter(Boolean).join('\n');
+
+  try {
+    await executar({
+      texto: 'INSERT INTO sugestao (tipo, mensagem, nome, email) VALUES ($1, $2, $3, $4)',
+      valores: ['NOVO_CURSO', mensagem, nome, email],
+    });
+    res.status(201).json({ ok: true });
+  } catch (e) {
+    console.error('Falha ao salvar pedido de curso:', e.message);
+    res.status(500).json({ erro: 'Não foi possível enviar agora. Tente de novo em alguns minutos.' });
+  }
+});
+
 // E-mails de contato das páginas legais (vêm da variável CONTATO_EMAIL)
 app.get('/api/contato', (req, res) => res.json({ emails: config.contatoEmails }));
 

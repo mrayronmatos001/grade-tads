@@ -25,6 +25,7 @@ Navegador (public/)  ──HTTP──▶  Servidor Express (server.js)  ──SQ
 | `/api/consulta` | POST | Resposta de uma pergunta: `{ tipo, parametros }` → `{ dados }` |
 | `/api/status` | GET | `{ ok: true }` se o banco responde |
 | `/api/sugestoes` | POST | Grava uma sugestão: `{ tipo, mensagem, nome?, email? }` |
+| `/api/solicitacoes` | POST | Pedido de página de outro curso: `{ universidade, curso, campus?, linkPpc?, linkGrade?, nome?, email, observacao? }` (grava como sugestão do tipo NOVO_CURSO) |
 | `/api/admin/sessao` | GET | Diz se a área admin está ativa e se há sessão |
 | `/api/admin/login` | POST | Entra com `{ senha }` e recebe o cookie de sessão |
 | `/api/admin/logout` | POST | Encerra a sessão |
@@ -90,6 +91,7 @@ banco diretamente com o usuário do PostgreSQL.
 | `sql/atualizacao_ementas.sql` | Atualização de um banco existente: ementas e correção de créditos |
 | `sql/atualizacao_optativas.sql` | Atualização de um banco existente: optativas da grade TADS 2019 |
 | `sql/atualizacao_prerequisitos_optativas.sql` | Atualização de um banco existente: pré-requisitos das optativas (PPC) |
+| `sql/atualizacao_solicitacoes.sql` | Atualização de um banco existente: aceita pedidos de novo curso (tipo NOVO_CURSO) |
 | `public/index.html`, `app.js`, `style.css` | A página |
 | `public/complementares.js` | Tabela das atividades complementares (resolução do colegiado). Para atualizar, edite este arquivo |
 | `public/termos.html`, `privacidade.html` | Termos de uso e política de privacidade |

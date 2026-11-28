@@ -1,5 +1,20 @@
 # Histórico de versões
 
+## 2.12.0
+- Tela inicial: na primeira visita, o site mostra as universidades
+  cadastradas (por enquanto, UFRN) e depois os cursos (TADS). A escolha fica
+  guardada no navegador; o logotipo e o link "trocar" no cabeçalho reabrem
+  o menu.
+- Botão "+" para pedir a página de outro curso ou universidade: o formulário
+  pede universidade, curso, campus, links do PPC e da grade com
+  pré-requisitos, nome e e-mail (obrigatório). Os pedidos aparecem no /admin
+  como "Novo curso".
+- Clicar em "créditos obrigatórios" no cabeçalho abre a grade completa.
+- Banco: nova migração `sql/atualizacao_solicitacoes.sql`, que aceita o tipo
+  NOVO_CURSO na tabela de sugestões.
+- Política de Privacidade: inclui os pedidos de curso e a escolha guardada
+  no navegador.
+
 ## 2.11.1
 - Celular, aba de pré-requisitos: os pré-requisitos ficam em cima e a
   disciplina escolhida (verde) embaixo, na mesma ordem do desktop.
