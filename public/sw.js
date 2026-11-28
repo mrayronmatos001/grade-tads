@@ -7,7 +7,7 @@
 // - Área /admin e envios (sugestões, pedidos): nunca passam pelo cache.
 // A VERSAO é trocada a cada versão do site; ao mudar, o cache antigo é apagado.
 // =====================================================================
-const VERSAO = '2.13.1';
+const VERSAO = '2.13.2';
 const CACHE = `grade-tads-${VERSAO}`;
 const ESSENCIAIS = [
   '/',

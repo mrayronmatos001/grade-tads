@@ -1,5 +1,9 @@
 # Histórico de versões
 
+## 2.13.2
+- Optativas: o rodapé diz o motivo do asterisco: "* criada depois do PPC:
+  confira o pré-requisito no SIGAA".
+
 ## 2.13.1
 - PWA: o app instalado se chama "Grades" e usa o símbolo da tela inicial
   (cartões ligados, fundo verde) como ícone, também no iPhone.

@@ -1317,7 +1317,7 @@ function htmlOptativas(estrutura) {
             const asterisco = OPTATIVAS_FORA_DO_PPC.has(o.codigo) ? ' <span class="opt-asterisco" title="Criada depois do PPC: confira o pré-requisito no SIGAA">*</span>' : '';
             return `<li><span class="opt-nome">${esc(bonito(o.nome))}${asterisco}${req ? `<small class="opt-req">requer ${esc(req)}</small>` : ''}</span><span class="opt-horas">${horasDe(o.creditos)} h</span></li>`;
           }).join('')}</ul>`).join('')}
-        ${semInformacao ? '<p class="opt-rodape"><span class="opt-asterisco">*</span> pré-requisito: confira no SIGAA</p>' : ''}
+        ${semInformacao ? '<p class="opt-rodape"><span class="opt-asterisco">*</span> criada depois do PPC: confira o pré-requisito no SIGAA</p>' : ''}
       </div>
     </details>`;
 }
